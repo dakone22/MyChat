@@ -1,11 +1,17 @@
 package core;
 
+import core.events.MessageSendEvent;
+import core.listeners.MessageSendListener;
+
+import javax.swing.event.EventListenerList;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
 public class Server {
+    private EventListenerList listenerList = new EventListenerList();
+
     private ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>();
     private ServerSocket serverSocket;
 
@@ -31,4 +37,15 @@ public class Server {
         c.send(msg);
     }
 
+    // region listeners
+
+    public void addMessageSendListener(MessageSendListener listener) {
+        listenerList.add(MessageSendListener.class, listener);
+    }
+
+    public void removeMessageSendListener(MessageSendListener listener) {
+        listenerList.remove(MessageSendListener.class, listener);
+    }
+
+    // endregion
 }
