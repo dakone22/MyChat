@@ -27,14 +27,22 @@ public class Server {
         }
     }
 
-    public void sendToAll(String msg) {
+    private void sendMessage(ClientHandler c, String msg) {
+        c.send(msg);
+    }
+
+    public void sendPublicMessage(String msg) {
         for (ClientHandler client : clients) {
             sendMessage(client, msg);
         }
+
+        for (MessageSendListener listener : listenerList.getListeners(MessageSendListener.class)) {
+            listener.onMessageSend(new MessageSendEvent(this, msg));
+        }
     }
 
-    public void sendMessage(ClientHandler c, String msg) {
-        c.send(msg);
+    public void sendPrivateMessage(ClientHandler c, String msg) {
+        sendMessage(c, msg);
     }
 
     // region listeners
