@@ -10,17 +10,17 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class Server {
-    private EventListenerList listenerList = new EventListenerList();
+    private final EventListenerList listenerList = new EventListenerList();
 
-    private ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>();
+    private final ArrayList<ClientHandler> clients = new ArrayList<>();
+
     private ServerSocket serverSocket;
 
     public void start(int port) throws IOException {
         serverSocket = new ServerSocket(port);
 
         while (!serverSocket.isClosed()) {
-            Socket clientSocket = null;
-            clientSocket = serverSocket.accept();
+            Socket clientSocket = serverSocket.accept();
 
             ClientHandler client = new ClientHandler(this, clientSocket);
             clients.add(client);
