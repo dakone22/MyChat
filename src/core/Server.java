@@ -36,13 +36,19 @@ public class Server {
             sendMessage(client, msg);
         }
 
+        MessageSendEvent e = new MessageSendEvent.Public(this, msg);
         for (MessageSendListener listener : listenerList.getListeners(MessageSendListener.class)) {
-            listener.onMessageSend(new MessageSendEvent(this, msg));
+            listener.onMessageSend(e);
         }
     }
 
     public void sendPrivateMessage(ClientHandler c, String msg) {
         sendMessage(c, msg);
+
+        MessageSendEvent e = new MessageSendEvent.Private(this, c, msg);
+        for (MessageSendListener listener : listenerList.getListeners(MessageSendListener.class)) {
+            listener.onMessageSend(e);
+        }
     }
 
     // region listeners
