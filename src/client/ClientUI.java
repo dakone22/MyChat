@@ -16,12 +16,12 @@ public class ClientUI {
         public JTextField tfMessage;
         public JTextArea taLog;
 
-        ClientWindow() {
+        ClientWindow() {  // TODO: Client UI
             btnSendMessage = new JButton("Отправить");
             btnConnect = new JButton("Присоедениться");
-            tfHost = new JTextField();
-            tfPort = new JTextField();
-            tfMessage = new JTextField("Введите ваше сообщение: ");
+            tfHost = new JTextField("localhost");
+            tfPort = new JTextField("1234");
+            tfMessage = new JTextField();
             taLog = new JTextArea();
             taLog.setEditable(false);
             taLog.setLineWrap(true);

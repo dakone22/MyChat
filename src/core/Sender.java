@@ -3,23 +3,23 @@ package core;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Sender implements Runnable {
     private final DataOutputStream dos;
-    private final Queue<String> messageQueue;
+    private final BlockingQueue<String> messageQueue;
     private boolean running;
 
 
     public Sender(OutputStream outputStream) {
-        messageQueue = new ArrayDeque<>();
+        messageQueue = new LinkedBlockingQueue<>();
         running = true;
 
         dos = new DataOutputStream(outputStream);
     }
 
-    private void send(String msg) {
+    private void sendImmediately(String msg) {
         if (!running) return;
         try {
             dos.writeUTF(msg);
@@ -37,25 +37,19 @@ public class Sender implements Runnable {
 
     @Override
     public void run() {
-        synchronized (messageQueue) {
+        try {
             while (running) {
-                try {
-                    while (messageQueue.isEmpty())
-                        messageQueue.wait();
-                } catch (InterruptedException e) {
-                    running = false;
-                    return;
-                }
-                send(messageQueue.poll());
+                var msg = messageQueue.take();
+                sendImmediately(msg);
             }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public void addToQueue(String msg) {
-        synchronized (messageQueue) {
-            messageQueue.offer(msg);
-            messageQueue.notify();
-        }
+    public void send(String msg) throws InterruptedException {
+        if (!messageQueue.add(msg))  // TODO: stress test
+            throw new InterruptedException();
     }
 
 }

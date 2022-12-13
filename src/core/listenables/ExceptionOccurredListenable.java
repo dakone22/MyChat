@@ -1,6 +1,5 @@
 package core.listenables;
 
-import core.Listenable;
 import core.events.ExceptionOccurredEvent;
 import core.listeners.ExceptionOccurredListener;
 

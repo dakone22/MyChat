@@ -16,11 +16,15 @@ public class ServerApplication {
             @Override
             public void clientJoined(ClientJoinEvent e) {
                 output.onClientJoin(e);
+                server.sendPublicMessage("HELLO NEW CLIENT");
             }
 
             @Override
             public void clientLeaved(ClientLeaveEvent e) {
                 output.onClientLeaved(e);
+                server.sendPublicMessage("BYE CLIENT");
+
+                // TODO: where to SendPublicMessage?
             }
         });
     }
@@ -35,6 +39,7 @@ public class ServerApplication {
     public void start(int port) {
         try {
             server.start(port);
+            output.onServerStart();
         } catch (Exception e) {
             output.onExceptionOccurred(new ExceptionOccurredEvent(this, e));
         }

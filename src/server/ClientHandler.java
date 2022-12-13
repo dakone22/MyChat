@@ -18,7 +18,7 @@ class ClientHandler extends Observable implements ExceptionOccurredListenable, M
     private final Thread senderThread;
     private final Thread receiverThread;
 
-    public ClientHandler(Socket clientSocket) throws IOException {
+    public ClientHandler(Socket clientSocket) throws IOException {  // TODO: Try out Client & ClientHandler Base class
         socket = clientSocket;
 
         sender = new Sender(socket.getOutputStream());
@@ -46,7 +46,7 @@ class ClientHandler extends Observable implements ExceptionOccurredListenable, M
         socket.close();
     }
 
-    void send(String message) {
-        sender.addToQueue(message);
+    void send(String message) throws InterruptedException {
+        sender.send(message);
     }
 }

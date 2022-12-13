@@ -16,10 +16,10 @@ public class ServerUI {
         public JTextField tfMessage;
         public JTextArea taLog;
 
-        ServerWindow() {
+        ServerWindow() {  // TODO: Server UI
             btnSendMessage = new JButton("Отправить");
             btnStart = new JButton("Запустить");
-            tfPort = new JTextField();
+            tfPort = new JTextField("1234");
             tfPort.setMinimumSize(new Dimension(120, 20));
             tfMessage = new JTextField();
             taLog = new JTextArea();
@@ -52,7 +52,7 @@ public class ServerUI {
         final ServerApplication app = new ServerApplication(new ServerOutput() {
             @Override
             public void onNewMessage(MessageReceivedEvent event) {
-                window.taLog.append(event.message);
+                window.taLog.append("[%s] %s\n".formatted(event.sender.toString(), event.message));
             }
 
             @Override
@@ -68,6 +68,11 @@ public class ServerUI {
             @Override
             public void onClientLeaved(ClientLeaveEvent event) {
                 window.taLog.append("Client %s leaved!\n".formatted(event.client.toString()));
+            }
+
+            @Override
+            public void onServerStart() {
+                window.taLog.append("Server started!\n");
             }
         });
 

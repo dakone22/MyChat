@@ -1,7 +1,5 @@
 package core.events;
 
-import core.Event;
-
 public class ExceptionOccurredEvent extends Event {
     public final Throwable exception;
 

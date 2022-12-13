@@ -15,7 +15,7 @@ public class Receiver extends Observable implements Runnable, MessageReceivedLis
         dis = new DataInputStream(inputStream);
     }
 
-    public String receive() throws IOException {
+    public String receive() throws IOException {  // TODO: MessagePayload
         if (!running) return "";
         String msg;
         try {

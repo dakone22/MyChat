@@ -1,6 +1,5 @@
 package core.listenables;
 
-import core.Listenable;
 import core.events.MessageReceivedEvent;
 import core.listeners.MessageReceivedListener;
 

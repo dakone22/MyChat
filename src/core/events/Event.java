@@ -1,4 +1,4 @@
-package core;
+package core.events;
 
 abstract public class Event {
     public final Object sender;

@@ -10,4 +10,6 @@ public interface ServerOutput {
     void onExceptionOccurred(ExceptionOccurredEvent event);
     void onClientJoin(ClientJoinEvent event);
     void onClientLeaved(ClientLeaveEvent event);
+
+    void onServerStart();
 }

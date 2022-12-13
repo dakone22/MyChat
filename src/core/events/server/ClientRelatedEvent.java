@@ -1,6 +1,6 @@
 package core.events.server;
 
-import core.Event;
+import core.events.Event;
 
 public abstract class ClientRelatedEvent extends Event {
     public final Object client;

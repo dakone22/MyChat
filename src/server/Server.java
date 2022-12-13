@@ -35,7 +35,11 @@ public class Server extends Observable implements ExceptionOccurredListenable, M
     }
 
     private void sendMessage(ClientHandler client, String message) {
-        client.send(message);
+        try {
+            client.send(message);
+        } catch (InterruptedException e) {
+            exceptionOccurred(new ExceptionOccurredEvent(client, e));
+        }
     }
 
     // endregion Client Handling

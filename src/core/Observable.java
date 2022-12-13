@@ -1,5 +1,7 @@
 package core;
 
+import core.listenables.Listenable;
+
 import javax.swing.event.EventListenerList;
 import java.util.EventListener;
 

@@ -20,8 +20,10 @@ public class Client extends Observable implements ExceptionOccurredListenable, M
     private Thread senderThread;
     private Thread receiverThread;
 
-    public void connect(InetAddress ip, int port) throws IOException {
-        socket = new Socket(ip, port);
+    public void connect(InetAddress host, int port) throws IOException {
+        // TODO: if (connected) return;
+
+        socket = new Socket(host, port);
 
         sender = new Sender(socket.getOutputStream());
         Receiver receiver = new Receiver(socket.getInputStream());
@@ -48,7 +50,7 @@ public class Client extends Observable implements ExceptionOccurredListenable, M
         socket.close();
     }
 
-    void send(String message) {
-        sender.addToQueue(message);
+    void send(String message) throws InterruptedException {
+        sender.send(message);
     }
 }

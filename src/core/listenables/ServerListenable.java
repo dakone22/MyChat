@@ -1,6 +1,5 @@
 package core.listenables;
 
-import core.Listenable;
 import core.events.server.ClientJoinEvent;
 import core.events.server.ClientLeaveEvent;
 import core.listeners.ServerListener;
