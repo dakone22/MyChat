@@ -1,40 +1,41 @@
 package core;
 
+import core.events.MessageReceivedEvent;
+import core.listenables.MessageReceivedListenable;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class Receiver implements Runnable {
+public class Receiver extends Observable implements Runnable, MessageReceivedListenable {
     private final DataInputStream dis;
-    private final Receivable receivable;
     private boolean running = true;
 
-    public Receiver(InputStream inputStream, Receivable target) {
+    public Receiver(InputStream inputStream) {
         dis = new DataInputStream(inputStream);
-        receivable = target;
     }
 
-    public String receive() {
+    public String receive() throws IOException {
         if (!running) return "";
-        String msg = "";
+        String msg;
         try {
             msg = dis.readUTF();
         } catch (IOException e) {
             running = false;
-            try {
-                dis.close();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            e.printStackTrace();
+            dis.close();
+            throw e;
         }
         return msg;
     }
 
     @Override
     public void run() {
-        while (running) {
-            receivable.receive(receive());
+        try {
+            while (running) {
+                messageReceived(new MessageReceivedEvent(this, receive()));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

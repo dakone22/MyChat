@@ -1,74 +1,54 @@
 package client;
 
+import core.Observable;
 import core.Receiver;
 import core.Sender;
+import core.events.ExceptionOccurredEvent;
+import core.listenables.ExceptionOccurredListenable;
+import core.listenables.MessageReceivedListenable;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.Socket;
-import java.util.Collection;
 import java.util.List;
 
-public class Client {
+public class Client extends Observable implements ExceptionOccurredListenable, MessageReceivedListenable {
     private Socket socket;
 
-    private Collection<Thread> threads;
+    private Sender sender;
 
-    public void connect(Inet4Address ip, int port) {
-        try {
-            socket = new Socket(ip, port);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+    private Thread senderThread;
+    private Thread receiverThread;
 
-        Sender sender;
-        Receiver receiver;
+    public void connect(InetAddress ip, int port) throws IOException {
+        socket = new Socket(ip, port);
 
-        try {
-            receiver = new Receiver(socket.getInputStream(), System.out::println);
-            sender = new Sender(socket.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+        sender = new Sender(socket.getOutputStream());
+        Receiver receiver = new Receiver(socket.getInputStream());
 
-        var console = new BufferedReader(new InputStreamReader(System.in));
-        var consoleReader = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    while (true)
-                        sender.addToQueue(console.readLine());
-                } catch (IOException e) {
-                    stop();
-                }
-            }
-        };
+        receiver.addMessageReceivedListener(this::messageReceived);
 
-        threads = List.of(new Thread[]{
-            new Thread(sender),
-            new Thread(receiver),
-            new Thread(consoleReader),
-        });
+        senderThread = new Thread(sender);
+        receiverThread = new Thread(receiver);
 
-        for (var thread : threads)
+        for (var thread : List.of(new Thread[]{senderThread, receiverThread})) {
+            thread.setUncaughtExceptionHandler((t, e) -> exceptionOccurred(new ExceptionOccurredEvent(t, e)));
             thread.start();
+        }
     }
 
-    void stop() {
-        for (var thread : threads)
-            thread.interrupt();
+    void stop() throws IOException {
+        for (var t : List.of(new Thread[]{senderThread, receiverThread}))
+            if (t != null && !t.isInterrupted())
+                t.interrupt();
 
         if (socket == null) return;
         if (socket.isClosed()) return;
 
-        try {
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        socket.close();
+    }
+
+    void send(String message) {
+        sender.addToQueue(message);
     }
 }

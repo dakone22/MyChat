@@ -1,53 +1,44 @@
 package server;
 
+import core.Observable;
+import core.events.server.ClientJoinEvent;
+import core.events.ExceptionOccurredEvent;
+import core.listenables.ExceptionOccurredListenable;
+import core.listenables.MessageReceivedListenable;
+import core.listenables.ServerListenable;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
-public class Server {
+public class Server extends Observable implements ExceptionOccurredListenable, MessageReceivedListenable, ServerListenable {
     private ServerSocket serverSocket;
-
-    private final ServerObserver observer;
-
-    public Server(ServerObserver observer) {
-        this.observer = observer;
-    }
-
 
     // region Client Handling
 
-    private final ArrayList<ClientHandler> clients = new ArrayList<>();
+    private final List<ClientHandler> clients = new ArrayList<>();
 
-    private final ClientHandlerObserver clientObserver = new ClientHandlerObserver() {
-        @Override
-        public void onMessageReceived(ClientHandler client, String message) {
-            observer.onMessageReceived(client, message);
-        }
+    private void acceptNewClient(Socket clientSocket) throws IOException {
+        var client = new ClientHandler(clientSocket);
 
-        @Override
-        public void onExceptionOccurred(ClientHandler client, Throwable exception) {
+        client.addMessageReceivedListener(this::messageReceived);
+        client.addExceptionOccurredListener(e -> {
             clients.remove(client);
-            observer.onClientDisconnected(client, exception);
-        }
-    };
+            exceptionOccurred(e);
+        });
 
-    private void acceptNewClient(Socket clientSocket) {
-        try {
-            var client = new ClientHandler(clientObserver, clientSocket);
-            clients.add(client);
+        clients.add(client);
 
-            observer.onClientJoin(client);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        clientJoined(new ClientJoinEvent(this, client));
     }
 
     private void sendMessage(ClientHandler client, String message) {
         client.send(message);
     }
 
-    // endregion Clients
+    // endregion Client Handling
 
 
     // region Public Interface
@@ -55,11 +46,19 @@ public class Server {
     public void start(int port) throws IOException {
         serverSocket = new ServerSocket(port);
 
-        while (!serverSocket.isClosed()) {
-            var clientSocket = serverSocket.accept();
+        var acceptionThread = new Thread(() -> {
+            try {
+                while (!serverSocket.isClosed()) {
+                    var clientSocket = serverSocket.accept();
 
-            acceptNewClient(clientSocket);
-        }
+                    acceptNewClient(clientSocket);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        acceptionThread.setUncaughtExceptionHandler((t, e) -> exceptionOccurred(new ExceptionOccurredEvent(t, e)));
+        acceptionThread.start();
     }
 
     public void stop() throws IOException {
@@ -69,7 +68,9 @@ public class Server {
         serverSocket.close();
 
         for (ClientHandler c : clients)
-            c.stop();
+            c.close();
+
+        clients.clear();
     }
 
     public void sendPublicMessage(String message) {
