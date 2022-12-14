@@ -1,11 +1,12 @@
 package server;
 
 import core.Observable;
-import core.Receiver;
-import core.Sender;
 import core.events.ExceptionOccurredEvent;
 import core.listenables.ExceptionOccurredListenable;
 import core.listenables.MessageReceivedListenable;
+import core.network.Receiver;
+import core.network.Sender;
+import core.network.packets.s2c.chat.MessageS2CPacket;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -46,7 +47,7 @@ class ClientHandler extends Observable implements ExceptionOccurredListenable, M
         socket.close();
     }
 
-    void send(String message) throws InterruptedException {
-        sender.send(message);
+    void send(MessageS2CPacket messagePacket) throws InterruptedException {
+        sender.send(messagePacket);
     }
 }

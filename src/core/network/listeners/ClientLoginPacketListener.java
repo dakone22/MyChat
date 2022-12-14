@@ -2,6 +2,7 @@ package core.network.listeners;
 
 import core.network.packets.s2c.login.LoginHelloS2CPacket;
 
-public interface ClientLoginPacketListener extends ClientPacketListener {
+@Deprecated
+public interface ClientLoginPacketListener extends PacketListener {
     void onHello(LoginHelloS2CPacket packet);
 }

@@ -1,11 +1,33 @@
 package core.network.packets;
 
 import core.network.listeners.PacketListener;
+import core.network.packets.fields.Fields;
 
-import java.io.*;
+import java.nio.ByteBuffer;
 
-public interface Packet<T extends PacketListener> extends Serializable {
-    void write(PacketByteBuffer buf);
+public abstract class Packet<T extends PacketListener> {
 
-    void apply(T listener);
+    protected static final Fields fields = new Fields();
+
+    public abstract void apply(T listener);
+
+    public void write(ByteBuffer buffer) {
+        for (var field : fields) { field.write(buffer); }
+    }
+    protected Packet<T> read(ByteBuffer buffer) {
+        for (var field : fields) { field.read(buffer); }
+        return this;
+    }
+
+//    public static <P extends Packet<?>> P createPacket(Class<P> packetClass, ByteBuffer buffer) {
+//        var emptyPacket = new
+//    }
+
+//    Packet() {}
+//
+//    public Packet(ByteBuffer buffer) {
+//        this();
+//        read(buffer);
+//    }
+
 }

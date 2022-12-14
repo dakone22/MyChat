@@ -4,27 +4,29 @@ import core.events.ExceptionOccurredEvent;
 import core.events.server.ClientJoinEvent;
 import core.events.server.ClientLeaveEvent;
 import core.listeners.ServerListener;
+import core.network.packets.s2c.chat.ClientLeaveS2CPacket;
 
 public class ServerApplication {
     private final ServerOutput output;
     private final Server server;
 
     private void setupListeners() {
-        server.addMessageReceivedListener(output::onNewMessage);
+        server.addMessageReceivedListener(e -> {
+            output.onNewMessage(e);
+            // TODO: echo messages
+        });
         server.addExceptionOccurredListener(output::onExceptionOccurred);
         server.addServerListener(new ServerListener() {
             @Override
             public void clientJoined(ClientJoinEvent e) {
                 output.onClientJoin(e);
-                server.sendPublicMessage("HELLO NEW CLIENT");
+                server.sendUserJoin((ClientHandler) e.client);  // TODO: UserClass
             }
 
             @Override
             public void clientLeaved(ClientLeaveEvent e) {
                 output.onClientLeaved(e);
-                server.sendPublicMessage("BYE CLIENT");
-
-                // TODO: where to SendPublicMessage?
+                server.sendUserLeave((ClientHandler) e.client, ClientLeaveS2CPacket.DisconnectReason.Error);  // TODO: proper disconnect and leave reasons
             }
         });
     }
@@ -46,6 +48,6 @@ public class ServerApplication {
     }
 
     public void send(String text) {
-        server.sendPublicMessage(text);
+        server.sendCustomMessage(text);
     }
 }

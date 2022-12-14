@@ -1,11 +1,12 @@
 package client;
 
 import core.Observable;
-import core.Receiver;
-import core.Sender;
+import core.network.Receiver;
+import core.network.Sender;
 import core.events.ExceptionOccurredEvent;
 import core.listenables.ExceptionOccurredListenable;
 import core.listenables.MessageReceivedListenable;
+import core.network.packets.c2s.chat.ChatMessageC2SPacket;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -50,7 +51,7 @@ public class Client extends Observable implements ExceptionOccurredListenable, M
         socket.close();
     }
 
-    void send(String message) throws InterruptedException {
-        sender.send(message);
+    void sendPublicMessage(String message) throws InterruptedException {
+        sender.send(new ChatMessageC2SPacket.Public(message));
     }
 }

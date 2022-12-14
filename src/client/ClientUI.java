@@ -26,6 +26,22 @@ public class ClientUI {
             taLog.setEditable(false);
             taLog.setLineWrap(true);
 
+
+            // add UI elements to window
+//            add(new JScrollPane(messageLog), BorderLayout.CENTER);
+//            JPanel sendPanel = new JPanel();
+//            sendPanel.add(messageField);
+//            sendPanel.add(sendButton);
+//            add(sendPanel, BorderLayout.SOUTH);
+//            JPanel connectPanel = new JPanel();
+//            connectPanel.add(new JLabel("Host:"));
+//            connectPanel.add(hostField);
+//            connectPanel.add(new JLabel("Port:"));
+//            connectPanel.add(portField);
+//            connectPanel.add(connectButton);
+//            add(connectPanel, BorderLayout.EAST);
+
+
             setBounds(600, 300, 600, 500);
             setTitle("Client");
             setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

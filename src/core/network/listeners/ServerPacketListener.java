@@ -1,4 +1,9 @@
 package core.network.listeners;
 
-public interface ServerPacketListener {
+import core.network.packets.c2s.chat.ChatMessageC2SPacket;
+
+public interface ServerPacketListener extends PacketListener {
+    void onPublicMessage(ChatMessageC2SPacket.Public packet);
+
+    void onPrivateMessage(ChatMessageC2SPacket.Private packet);
 }

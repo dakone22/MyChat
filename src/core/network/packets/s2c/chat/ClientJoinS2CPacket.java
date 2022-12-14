@@ -1,27 +1,27 @@
 package core.network.packets.s2c.chat;
 
-import core.network.listeners.ClientChatPacketListener;
-import core.network.packets.Packet;
-import core.network.packets.PacketByteBuffer;
+import core.network.listeners.ClientPacketListener;
+import core.network.packets.fields.Field;
+import core.network.packets.fields.StringField;
 
-public class ClientJoinS2CPacket implements Packet<ClientChatPacketListener> {
-    private final String client;  // TODO: ClientClass
+import java.nio.ByteBuffer;
+import java.time.LocalDateTime;
 
-    public ClientJoinS2CPacket(String client) {
-        this.client = client;
+public class ClientJoinS2CPacket extends MessageS2CPacket {
+    private final Field<String> client = fields.add(new StringField.Builder().build());  // TODO: ClientField
+
+    public ClientJoinS2CPacket(ByteBuffer buffer) { super(buffer); }
+    public ClientJoinS2CPacket(Integer index, LocalDateTime dateTime, String client) {
+        super(index, dateTime);
+        this.client.setValue(client);
     }
 
-    public ClientJoinS2CPacket(PacketByteBuffer buf) {
-        this.client = buf.readString();
+    public String getClient() {
+        return client.getValue();
     }
 
     @Override
-    public void write(PacketByteBuffer buf) {
-
-    }
-
-    @Override
-    public void apply(ClientChatPacketListener listener) {
-
+    protected void apply(ClientPacketListener listener) {
+        listener.onClientJoin(this);
     }
 }
