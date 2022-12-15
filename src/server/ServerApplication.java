@@ -54,8 +54,8 @@ public class ServerApplication {
             }
 
             @Override
-            public void onExceptionOccurred(Object sender, Throwable exception) {
-                output.onExceptionOccurred(sender, exception);
+            public void exceptionOccurred(Object sender, Throwable exception) {
+                output.exceptionOccurred(sender, exception);
 
                 if (sender == serverHandler)
                     stop();
@@ -67,7 +67,7 @@ public class ServerApplication {
         try {
             serverHandler.start(port);
         } catch (Exception e) {
-            output.onExceptionOccurred(this, e);
+            output.exceptionOccurred(this, e);
         }
     }
 
@@ -75,7 +75,7 @@ public class ServerApplication {
         try {
             serverHandler.stop();
         } catch (Exception e) {
-            output.onExceptionOccurred(this, e);
+            output.exceptionOccurred(this, e);
         }
     }
 

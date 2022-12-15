@@ -8,10 +8,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-public abstract class Packet<T extends PacketListener> implements Serializable {
-
-    public abstract void apply(T listener);
-
-    protected Packet() {
-    }
+public interface Packet<T extends PacketListener> extends Serializable {
+    public void apply(T listener);
 }

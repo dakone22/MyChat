@@ -1,7 +1,14 @@
 package client;
 
+import core.User;
+import core.network.packets.s2c.chat.ClientLeaveS2CPacket;
+import core.network.packets.s2c.chat.SystemMessageS2CPacket;
+import core.network.packets.s2c.service.ConnectedFailureS2CPacket;
+import core.network.packets.s2c.service.DisconnectedS2CPacket;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 
 public class ClientWindow {
@@ -62,70 +69,90 @@ public class ClientWindow {
     public ClientWindow() {
         final var window = new ChatFrame();
 
-        final ClientApplication app = new ClientApplication(new ClientApplicationListener() {
-//            @Override
-//            public void onPublicMessage(ChatMessageS2CPacket.Public packet) {
-//                window.taLog.append("[%s] (%d) %s: %s\n".formatted(
-//                        packet.getDateTime().toString(),
-//                        packet.getIndex(),
-//                        packet.getSender(),
-//                        packet.getMessage()
-//                ));
-//            }
-//
-//            @Override
-//            public void onPrivateMessage(ChatMessageS2CPacket.Private packet) {
-//                window.taLog.append("[%s] (%d) %s -> %s: %s\n".formatted(
-//                        packet.getDateTime().toString(),
-//                        packet.getIndex(),
-//                        packet.getSender(),
-//                        packet.getReceiver(),
-//                        packet.getMessage()
-//                ));
-//            }
-//
-//            @Override
-//            public void onSystemMessage(SystemMessageS2CPacket packet) {
-//                // TODO: system messages
-//            }
-//
-//            @Override
-//            public void onCustomSystemMessage(CustomSystemMessageS2CPacket packet) {
-//                window.taLog.append("[%s] (%d) SERVER: %s\n".formatted(
-//                        packet.getDateTime().toString(),
-//                        packet.getIndex(),
-//                        packet.getMessage()
-//                ));
-//            }
-//
-//            @Override
-//            public void onClientJoin(ClientJoinS2CPacket packet) {
-//                window.taLog.append("[%s] (%d) %s joined!\n".formatted(
-//                        packet.getDateTime().toString(),
-//                        packet.getIndex(),
-//                        packet.getUser()
-//                ));
-//            }
-//
-//            @Override
-//            public void onClientLeave(ClientLeaveS2CPacket packet) {
-//                window.taLog.append("[%s] (%d) %s left (%s)\n".formatted(
-//                        packet.getDateTime().toString(),
-//                        packet.getIndex(),
-//                        packet.getUser(),
-//                        packet.getDisconnectReason().toString()
-//                ));
-//            }
-//
-            @Override
-            public void onExceptionOccurred(Object sender, Throwable e) {
-                window.taLog.append("[err] %s.\n".formatted(e.getMessage()));
-            }
-        });
+        final ClientApplication app = new ClientApplication(getApplicationListener(window));
 
         window.btnConnect.addActionListener(e -> app.connect(window.tfHost.getText(), Integer.parseInt(window.tfPort.getText())));
         window.btnSendMessage.addActionListener(e -> app.sendPublicMessage(window.tfMessage.getText()));
 
         window.setVisible(true);
+    }
+
+    private static ClientApplicationListener getApplicationListener(ChatFrame window) {
+        return new ClientApplicationListener() {
+            @Override
+            public void onCustomMessage(String message) {
+
+            }
+
+            @Override
+            public void publicMessage(User sender, String message) {
+                window.taLog.append("%s: %s\n".formatted(
+                        sender.username(),
+                        message
+                ));
+            }
+
+            @Override
+            public void privateMessage(User sender, User receiver, String message) {
+                window.taLog.append("%s -> %s: %s\n".formatted(
+                        sender,
+                        receiver,
+                        message
+                ));
+            }
+
+            @Override
+            public void clientJoined(User user) {
+                window.taLog.append("[server] User %s joined\n".formatted(
+                        user.username()
+                ));
+            }
+
+            @Override
+            public void clientLeft(User user, ClientLeaveS2CPacket.DisconnectReason reason) {
+                window.taLog.append("[server] User %s left: %s\n".formatted(
+                        user.username(),
+                        reason.toString()
+                ));
+            }
+
+            @Override
+            public void connected(User assignedUser) {
+                window.taLog.append("[server] Joined to server as %s\n".formatted(
+                        assignedUser.username()
+                ));
+            }
+
+            @Override
+            public void updateUserList(List<User> userList) {
+                // todo: userList
+            }
+
+            @Override
+            public void disconnected(DisconnectedS2CPacket.DisconnectReason reason) {
+                window.taLog.append("[server] Disconnected from server: %s\n".formatted(
+                        reason.toString()
+                ));
+            }
+
+            @Override
+            public void systemMessage(SystemMessageS2CPacket.MessageType messageType) {
+                window.taLog.append("[server] %s\n".formatted(
+                        messageType.toString()
+                ));
+            }
+
+            @Override
+            public void connectFailed(ConnectedFailureS2CPacket.FailReason failReason) {
+                window.taLog.append("[server] Connection Refused: %s\n".formatted(
+                        failReason.toString()
+                ));
+            }
+
+            @Override
+            public void exceptionOccurred(Object sender, Throwable e) {
+                window.taLog.append("[err] %s.\n".formatted(e.getMessage()));
+            }
+        };
     }
 }

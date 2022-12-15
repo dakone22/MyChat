@@ -79,7 +79,7 @@ public class ServerWindow {
             }
 
             @Override
-            public void onExceptionOccurred(Object sender, Throwable exception) {
+            public void exceptionOccurred(Object sender, Throwable exception) {
                 window.taLog.append("[server] Error occurred: %s throws %s\n".formatted(sender.toString(), exception.getMessage()));
             }
         };

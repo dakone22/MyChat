@@ -26,7 +26,7 @@ public class Connection<R extends PacketListener, S extends PacketListener> {  /
     protected void throwException(Object sender, Throwable e) {
         if (exceptionOccurredListener == null)
             throw new RuntimeException(e);
-        exceptionOccurredListener.onExceptionOccurred(sender, e);
+        exceptionOccurredListener.exceptionOccurred(sender, e);
     }
 
     protected void startConnection(Socket socket, PacketHandler<S> packetSenderHandler, PacketHandler<R> packetReceiverHandler, R listener) throws IOException {

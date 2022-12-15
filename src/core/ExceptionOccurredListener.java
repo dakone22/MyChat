@@ -1,5 +1,5 @@
 package core;
 
 public interface ExceptionOccurredListener {
-    void onExceptionOccurred(Object sender, Throwable exception);
+    void exceptionOccurred(Object sender, Throwable exception);
 }

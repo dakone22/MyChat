@@ -19,7 +19,7 @@ public class Receiver<T extends PacketListener> implements Runnable {
         this.listener = listener;
     }
 
-    private void receive() throws IOException {
+    private void receive() throws IOException, ClassNotFoundException {
         if (!running) return;
 
         try {
@@ -27,7 +27,7 @@ public class Receiver<T extends PacketListener> implements Runnable {
             if (packet == null) throw new IOException("Empty packet!");
 
             PacketHandler.handlePacket(packet, listener);
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             running = false;
             inputStream.close();
             throw e;
@@ -40,7 +40,7 @@ public class Receiver<T extends PacketListener> implements Runnable {
             while (running) {
                 receive();
             }
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }

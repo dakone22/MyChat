@@ -6,9 +6,9 @@ import core.network.packets.s2c.service.ConnectedSuccessS2CPacket;
 import core.network.packets.s2c.service.DisconnectedS2CPacket;
 
 public interface ClientPacketListener extends PacketListener {
-    void onPublicMessage(ChatMessageS2CPacket.Public packet);
+    void onPublicMessage(PublicChatMessageS2CPacket packet);
 
-    void onPrivateMessage(ChatMessageS2CPacket.Private packet);
+    void onPrivateMessage(PrivateChatMessageS2CPacket packet);
 
     void onSystemMessage(SystemMessageS2CPacket packet);
 
