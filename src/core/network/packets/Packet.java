@@ -1,33 +1,26 @@
 package core.network.packets;
 
+import core.Streamable;
 import core.network.listeners.PacketListener;
-import core.network.packets.fields.Fields;
+import core.network.fields.Fields;
 
-import java.nio.ByteBuffer;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
-public abstract class Packet<T extends PacketListener> {
+public abstract class Packet<T extends PacketListener> implements Streamable {
 
-    protected static final Fields fields = new Fields();
+    protected final Fields fields = new Fields();
 
     public abstract void apply(T listener);
 
-    public void write(ByteBuffer buffer) {
-        for (var field : fields) { field.write(buffer); }
-    }
-    protected Packet<T> read(ByteBuffer buffer) {
-        for (var field : fields) { field.read(buffer); }
-        return this;
+    public void write(ObjectOutputStream ostream) throws IOException {
+        fields.write(ostream);
     }
 
-//    public static <P extends Packet<?>> P createPacket(Class<P> packetClass, ByteBuffer buffer) {
-//        var emptyPacket = new
-//    }
+    public void read(ObjectInputStream istream) throws IOException {
+        fields.read(istream);
+    }
 
-//    Packet() {}
-//
-//    public Packet(ByteBuffer buffer) {
-//        this();
-//        read(buffer);
-//    }
-
+    protected Packet() { }
 }

@@ -1,42 +1,44 @@
 package core.network;
 
-import core.Observable;
-import core.events.MessageReceivedEvent;
-import core.listenables.MessageReceivedListenable;
+import core.network.listeners.PacketListener;
 import core.network.packets.Packet;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 
-public class Receiver extends Observable implements Runnable, MessageReceivedListenable {
-    private final DataInputStream dis;
-    private final PacketReceiver packetHandler;
+public class Receiver <T extends PacketListener> implements Runnable {
+    private final ObjectInputStream inputStream;
+    private final PacketHandler<T> packetHandler;
+    private final T listener;
     private boolean running = true;
 
-    public Receiver(InputStream inputStream, PacketReceiver packetHandler) {
-        dis = new DataInputStream(inputStream);
+    public Receiver(InputStream inputStream, PacketHandler<T> packetHandler, T listener) throws IOException {
+        this.inputStream = new ObjectInputStream(inputStream);
         this.packetHandler = packetHandler;
+        this.listener = listener;
     }
 
-    public Packet<?> receive() throws IOException {  // TODO: MessagePayload
-        if (!running) return "";
-        String msg;
+    private void receive() throws IOException {
+        if (!running) return;
+
         try {
-            msg = dis.readUTF();
+            Packet<T> packet = packetHandler.receivePacket(inputStream);
+            if (packet == null) throw new IOException("Empty packet!");
+
+            PacketHandler.handlePacket(packet, listener);
         } catch (IOException e) {
             running = false;
-            dis.close();
+            inputStream.close();
             throw e;
         }
-        return msg;
     }
 
     @Override
     public void run() {
         try {
             while (running) {
-                messageReceived(new MessageReceivedEvent(this, receive()));
+                receive();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

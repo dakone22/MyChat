@@ -1,53 +1,80 @@
 package server;
 
-import core.events.ExceptionOccurredEvent;
-import core.events.server.ClientJoinEvent;
-import core.events.server.ClientLeaveEvent;
-import core.listeners.ServerListener;
-import core.network.packets.s2c.chat.ClientLeaveS2CPacket;
+import core.network.packets.s2c.ClientLeaveS2CPacket;
 
 public class ServerApplication {
-    private final ServerOutput output;
-    private final Server server;
+    private final ServerUserInterface output;
+    private final ServerHandler serverHandler;
 
-    private void setupListeners() {
-        server.addMessageReceivedListener(e -> {
-            output.onNewMessage(e);
-            // TODO: echo messages
-        });
-        server.addExceptionOccurredListener(output::onExceptionOccurred);
-        server.addServerListener(new ServerListener() {
-            @Override
-            public void clientJoined(ClientJoinEvent e) {
-                output.onClientJoin(e);
-                server.sendUserJoin((ClientHandler) e.client);  // TODO: UserClass
-            }
-
-            @Override
-            public void clientLeaved(ClientLeaveEvent e) {
-                output.onClientLeaved(e);
-                server.sendUserLeave((ClientHandler) e.client, ClientLeaveS2CPacket.DisconnectReason.Error);  // TODO: proper disconnect and leave reasons
-            }
-        });
+    public ServerApplication(ServerUserInterface serverUserInterface) {
+        output = serverUserInterface;
+        serverHandler = new ServerHandler(getHandlerListener());
     }
 
-    public ServerApplication(ServerOutput serverOutput) {
-        output = serverOutput;
-        server = new Server();
+    private ServerHandlerListener getHandlerListener() {
+        return new ServerHandlerListener() {
+            @Override
+            public void onServerStart() {
+                output.onServerStart();
+            }
 
-        setupListeners();
+            @Override
+            public void onClientJoin(ClientConnectionHandler client) {
+                output.onClientJoin(client);
+                serverHandler.sendUserJoin(client);
+            }
+
+            @Override
+            public void onClientLeave(ClientConnectionHandler client) {
+                output.onClientLeave(client);
+                serverHandler.sendUserLeave(client, ClientLeaveS2CPacket.DisconnectReason.SelfDisconnect);
+            }
+
+            @Override
+            public void onClientDisconnect(ClientConnectionHandler client) {
+                output.onClientLeave(client);
+                serverHandler.sendUserLeave(client, ClientLeaveS2CPacket.DisconnectReason.Error);
+            }
+
+            @Override
+            public void onPublicMessage(ClientConnectionHandler sender, String message) {
+                output.onPublicMessage(sender, message);
+                serverHandler.sendPublicMessage(sender, message);
+            }
+
+            @Override
+            public void onPrivateMessage(ClientConnectionHandler sender, String receiver, String message) {
+                output.onPrivateMessage(sender, receiver, message);
+                serverHandler.sendPublicMessage(sender, message);
+            }
+
+            @Override
+            public void onExceptionOccurred(Object sender, Throwable exception) {
+                output.onExceptionOccurred(sender, exception);
+
+                if (sender == serverHandler)
+                    stop();
+            }
+        };
     }
 
     public void start(int port) {
         try {
-            server.start(port);
-            output.onServerStart();
+            serverHandler.start(port);
         } catch (Exception e) {
-            output.onExceptionOccurred(new ExceptionOccurredEvent(this, e));
+            output.onExceptionOccurred(this, e);
+        }
+    }
+
+    public void stop() {
+        try {
+            serverHandler.stop();
+        } catch (Exception e) {
+            output.onExceptionOccurred(this, e);
         }
     }
 
     public void send(String text) {
-        server.sendCustomMessage(text);
+        serverHandler.sendCustomMessage(text);
     }
 }

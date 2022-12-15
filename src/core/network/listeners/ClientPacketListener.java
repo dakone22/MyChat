@@ -1,6 +1,6 @@
 package core.network.listeners;
 
-import core.network.packets.s2c.chat.*;
+import core.network.packets.s2c.*;
 
 public interface ClientPacketListener extends PacketListener {
     void onPublicMessage(ChatMessageS2CPacket.Public packet);

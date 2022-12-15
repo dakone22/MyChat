@@ -1,73 +1,35 @@
 package client;
 
-import core.events.ExceptionOccurredEvent;
-import core.network.listeners.ClientPacketListener;
-import core.network.packets.s2c.chat.*;
+import core.network.packets.c2s.ChatMessageC2SPacket;
 
 import java.net.InetAddress;
 
 public class ClientApplication {
-    private final ClientOutput output;
-    private final Client client;
-    private final ClientPacketListener clientPacketHandler;
+    private final ClientClientInterface userInterface;
+    private final ClientConnection networkHandler;
 
-    private void setupListeners() {
-        client.addMessageReceivedListener(output::newMessage);
-        client.addExceptionOccurredListener(output::exceptionOccurred);
-    }
+    public ClientApplication(ClientClientInterface clientClientInterface) {
+        userInterface = clientClientInterface;
 
-    public ClientApplication(ClientOutput clientOutput) {
-        output = clientOutput;
-        client = new Client();
-
-        clientPacketHandler = new ClientPacketListener() {
-            @Override
-            public void onPublicMessage(ChatMessageS2CPacket.Public packet) {
-
-            }
-
-            @Override
-            public void onPrivateMessage(ChatMessageS2CPacket.Private packet) {
-
-            }
-
-            @Override
-            public void onSystemMessage(SystemMessageS2CPacket packet) {
-
-            }
-
-            @Override
-            public void onCustomSystemMessage(CustomSystemMessageS2CPacket packet) {
-
-            }
-
-            @Override
-            public void onClientJoin(ClientJoinS2CPacket packet) {
-
-            }
-
-            @Override
-            public void onClientLeave(ClientLeaveS2CPacket packet) {
-
-            }
-        };
-
-        setupListeners();
+        networkHandler = new ClientConnection(userInterface);
+        networkHandler.addExceptionOccurredListener(userInterface);
     }
 
     public void connect(String host, int port) {
         try {
-            client.connect(InetAddress.getByName(host), port);
+            networkHandler.connect(InetAddress.getByName(host), port);
         } catch (Exception e) {
-            output.exceptionOccurred(new ExceptionOccurredEvent(this, e));
+            userInterface.onExceptionOccurred(this, e);
         }
     }
 
-    public void send(String text) {
+    public void sendPublicMessage(String text) {
         try {
-            client.sendPublicMessage(text);
+            networkHandler.sendPacket(new ChatMessageC2SPacket.Public(text));
         } catch (Exception e) {
-            output.exceptionOccurred(new ExceptionOccurredEvent(this, e));
+            userInterface.onExceptionOccurred(this, e);
         }
     }
+
+
 }
