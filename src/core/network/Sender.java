@@ -9,7 +9,7 @@ import java.io.OutputStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class Sender <T extends PacketListener> implements Runnable {
+public class Sender<T extends PacketListener> implements Runnable {
     private final BlockingQueue<Packet<? extends T>> messageQueue;
     private final ObjectOutputStream outputStream;
     private final PacketHandler<T> packetHandler;

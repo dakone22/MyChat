@@ -51,8 +51,8 @@ public class ServerWindow {
         window.setVisible(true);
     }
 
-    private static ServerUserInterface getServerUserInterface(ControlFrame window) {
-        return new ServerUserInterface() {
+    private static ServerApplicationListener getServerUserInterface(ControlFrame window) {
+        return new ServerApplicationListener() {
             @Override
             public void onServerStart() {
                 window.taLog.append("[server] Start\n");

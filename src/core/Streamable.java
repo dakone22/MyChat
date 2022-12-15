@@ -6,5 +6,6 @@ import java.io.ObjectOutputStream;
 
 public interface Streamable {
     void read(ObjectInputStream istream) throws IOException;
+
     void write(ObjectOutputStream ostream) throws IOException;
 }

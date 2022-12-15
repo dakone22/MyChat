@@ -1,4 +1,4 @@
-package core.network.packets.s2c;
+package core.network.packets.s2c.chat;
 
 import core.network.fields.Field;
 import core.network.fields.IntField;
@@ -9,21 +9,21 @@ import core.network.packets.Packet;
 import java.time.LocalDateTime;
 
 public abstract class MessageS2CPacket extends Packet<ClientPacketListener> {
-    protected final Field<Integer> index = fields.add(new IntField.Builder().min(0).build());
-    protected final Field<LocalDateTime> dateTime = fields.add(new LocalDateTimeField.Builder().build());
+    protected final Field<Integer> indexField = fields.add(new IntField.Builder().min(0).build());
+    protected final Field<LocalDateTime> dateTimeField = fields.add(new LocalDateTimeField.Builder().build());
 
     protected MessageS2CPacket(Integer index, LocalDateTime dateTime) {
-        this.index.setValue(index);
-        this.dateTime.setValue(dateTime);
+        this.indexField.setValue(index);
+        this.dateTimeField.setValue(dateTime);
     }
 
     protected MessageS2CPacket() {}
 
     public Integer getIndex() {
-        return index.getValue();
+        return indexField.getValue();
     }
 
     public LocalDateTime getDateTime() {
-        return dateTime.getValue();
+        return dateTimeField.getValue();
     }
 }

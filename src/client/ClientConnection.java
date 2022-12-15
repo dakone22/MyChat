@@ -13,9 +13,9 @@ import static core.network.PacketHandler.S2C_PACKET_HANDLER;
 
 public class ClientConnection extends Connection<ClientPacketListener, ServerPacketListener> {
 
-    private final ClientPacketListener clientPacketListener;
+    private final ClientConnectionListener clientPacketListener;
 
-    public ClientConnection(ClientPacketListener listener) {
+    public ClientConnection(ClientConnectionListener listener) {
         this.clientPacketListener = listener;
     }
 
@@ -25,8 +25,4 @@ public class ClientConnection extends Connection<ClientPacketListener, ServerPac
         socket = new Socket(host, port);
         startConnection(socket, C2S_PACKET_HANDLER, S2C_PACKET_HANDLER, clientPacketListener);
     }
-
-//    void sendPacket(Packet<? extends ServerPacketListener> packet) throws InterruptedException {
-//        sender.send(packet);
-//    }
 }

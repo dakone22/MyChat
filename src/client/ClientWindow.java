@@ -1,7 +1,5 @@
 package client;
 
-import core.network.packets.s2c.*;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -64,61 +62,61 @@ public class ClientWindow {
     public ClientWindow() {
         final var window = new ChatFrame();
 
-        final ClientApplication app = new ClientApplication(new ClientClientInterface() {
-            @Override
-            public void onPublicMessage(ChatMessageS2CPacket.Public packet) {
-                window.taLog.append("[%s] (%d) %s: %s\n".formatted(
-                        packet.getDateTime().toString(),
-                        packet.getIndex(),
-                        packet.getSender(),
-                        packet.getMessage()
-                ));
-            }
-
-            @Override
-            public void onPrivateMessage(ChatMessageS2CPacket.Private packet) {
-                window.taLog.append("[%s] (%d) %s -> %s: %s\n".formatted(
-                        packet.getDateTime().toString(),
-                        packet.getIndex(),
-                        packet.getSender(),
-                        packet.getReceiver(),
-                        packet.getMessage()
-                ));
-            }
-
-            @Override
-            public void onSystemMessage(SystemMessageS2CPacket packet) {
-                // TODO: system messages
-            }
-
-            @Override
-            public void onCustomSystemMessage(CustomSystemMessageS2CPacket packet) {
-                window.taLog.append("[%s] (%d) SERVER: %s\n".formatted(
-                        packet.getDateTime().toString(),
-                        packet.getIndex(),
-                        packet.getMessage()
-                ));
-            }
-
-            @Override
-            public void onClientJoin(ClientJoinS2CPacket packet) {
-                window.taLog.append("[%s] (%d) %s joined!\n".formatted(
-                        packet.getDateTime().toString(),
-                        packet.getIndex(),
-                        packet.getClient()
-                ));
-            }
-
-            @Override
-            public void onClientLeave(ClientLeaveS2CPacket packet) {
-                window.taLog.append("[%s] (%d) %s left (%s)\n".formatted(
-                        packet.getDateTime().toString(),
-                        packet.getIndex(),
-                        packet.getClient(),
-                        packet.getDisconnectReason().toString()
-                ));
-            }
-
+        final ClientApplication app = new ClientApplication(new ClientApplicationListener() {
+//            @Override
+//            public void onPublicMessage(ChatMessageS2CPacket.Public packet) {
+//                window.taLog.append("[%s] (%d) %s: %s\n".formatted(
+//                        packet.getDateTime().toString(),
+//                        packet.getIndex(),
+//                        packet.getSender(),
+//                        packet.getMessage()
+//                ));
+//            }
+//
+//            @Override
+//            public void onPrivateMessage(ChatMessageS2CPacket.Private packet) {
+//                window.taLog.append("[%s] (%d) %s -> %s: %s\n".formatted(
+//                        packet.getDateTime().toString(),
+//                        packet.getIndex(),
+//                        packet.getSender(),
+//                        packet.getReceiver(),
+//                        packet.getMessage()
+//                ));
+//            }
+//
+//            @Override
+//            public void onSystemMessage(SystemMessageS2CPacket packet) {
+//                // TODO: system messages
+//            }
+//
+//            @Override
+//            public void onCustomSystemMessage(CustomSystemMessageS2CPacket packet) {
+//                window.taLog.append("[%s] (%d) SERVER: %s\n".formatted(
+//                        packet.getDateTime().toString(),
+//                        packet.getIndex(),
+//                        packet.getMessage()
+//                ));
+//            }
+//
+//            @Override
+//            public void onClientJoin(ClientJoinS2CPacket packet) {
+//                window.taLog.append("[%s] (%d) %s joined!\n".formatted(
+//                        packet.getDateTime().toString(),
+//                        packet.getIndex(),
+//                        packet.getUser()
+//                ));
+//            }
+//
+//            @Override
+//            public void onClientLeave(ClientLeaveS2CPacket packet) {
+//                window.taLog.append("[%s] (%d) %s left (%s)\n".formatted(
+//                        packet.getDateTime().toString(),
+//                        packet.getIndex(),
+//                        packet.getUser(),
+//                        packet.getDisconnectReason().toString()
+//                ));
+//            }
+//
             @Override
             public void onExceptionOccurred(Object sender, Throwable e) {
                 window.taLog.append("[err] %s.\n".formatted(e.getMessage()));

@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 
-public class Connection<R extends PacketListener, S extends PacketListener>  {  // R - receivable (получаемые)
-                                                                                        // S - sendable (отправляемые)
+public class Connection<R extends PacketListener, S extends PacketListener> {  // R - receivable (получаемые)
+    // S - sendable (отправляемые)
     protected Socket socket;
     protected Thread senderThread;
     protected Sender<S> sender;

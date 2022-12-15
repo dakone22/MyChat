@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 
-public class Receiver <T extends PacketListener> implements Runnable {
+public class Receiver<T extends PacketListener> implements Runnable {
     private final ObjectInputStream inputStream;
     private final PacketHandler<T> packetHandler;
     private final T listener;

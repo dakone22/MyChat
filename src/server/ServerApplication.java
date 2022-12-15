@@ -1,13 +1,18 @@
 package server;
 
-import core.network.packets.s2c.ClientLeaveS2CPacket;
+import core.User;
+import core.network.packets.s2c.chat.ClientLeaveS2CPacket;
+
+import java.util.List;
 
 public class ServerApplication {
-    private final ServerUserInterface output;
+    private final ServerApplicationListener output;
     private final ServerHandler serverHandler;
 
-    public ServerApplication(ServerUserInterface serverUserInterface) {
-        output = serverUserInterface;
+    private final List<User> userList;
+
+    public ServerApplication(ServerApplicationListener serverApplicationListener) {
+        output = serverApplicationListener;
         serverHandler = new ServerHandler(getHandlerListener());
     }
 

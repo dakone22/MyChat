@@ -20,7 +20,4 @@ public class ClientConnectionHandler extends Connection<ServerPacketListener, Cl
         startConnection(socket, S2C_PACKET_HANDLER, C2S_PACKET_HANDLER, listener);
     }
 
-//    public void sendPacket(Packet<? extends ClientPacketListener> packet) throws InterruptedException {
-//        sender.send(packet);
-//    }
 }

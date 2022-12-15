@@ -4,8 +4,13 @@ import core.network.listeners.ClientPacketListener;
 import core.network.listeners.PacketListener;
 import core.network.listeners.ServerPacketListener;
 import core.network.packets.Packet;
-import core.network.packets.c2s.ChatMessageC2SPacket;
-import core.network.packets.s2c.*;
+import core.network.packets.c2s.chat.ChatMessageC2SPacket;
+import core.network.packets.c2s.service.DisconnectC2SPacket;
+import core.network.packets.c2s.service.HandshakeC2SPacket;
+import core.network.packets.s2c.chat.*;
+import core.network.packets.s2c.service.ConnectedFailureS2CPacket;
+import core.network.packets.s2c.service.ConnectedSuccessS2CPacket;
+import core.network.packets.s2c.service.DisconnectedS2CPacket;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -20,18 +25,23 @@ public class PacketHandler<T extends PacketListener> {
         R apply(T t) throws IOException;
     }
 
-    public static PacketHandler<ClientPacketListener> S2C_PACKET_HANDLER = new PacketHandler<ClientPacketListener>()
+    public static PacketHandler<ClientPacketListener> S2C_PACKET_HANDLER = (new PacketHandler<ClientPacketListener>()
             .register(SystemMessageS2CPacket.class, SystemMessageS2CPacket::new)
             .register(ClientJoinS2CPacket.class, ClientJoinS2CPacket::new)
             .register(ClientLeaveS2CPacket.class, ClientLeaveS2CPacket::new)
             .register(ChatMessageS2CPacket.Public.class, ChatMessageS2CPacket.Public::new)
             .register(ChatMessageS2CPacket.Private.class, ChatMessageS2CPacket.Private::new)
             .register(CustomSystemMessageS2CPacket.class, CustomSystemMessageS2CPacket::new)
-    ;
+            .register(ConnectedSuccessS2CPacket .class, ConnectedSuccessS2CPacket::new)
+            .register(ConnectedFailureS2CPacket.class, ConnectedFailureS2CPacket::new)
+            .register(DisconnectedS2CPacket.class, DisconnectedS2CPacket::new)
+    );
 
     public static PacketHandler<ServerPacketListener> C2S_PACKET_HANDLER = (new PacketHandler<ServerPacketListener>()
             .register(ChatMessageC2SPacket.Public.class, ChatMessageC2SPacket.Public::new)
             .register(ChatMessageC2SPacket.Private.class, ChatMessageC2SPacket.Private::new)
+            .register(HandshakeC2SPacket.class, HandshakeC2SPacket::new)
+            .register(DisconnectC2SPacket.class, DisconnectC2SPacket::new)
     );
 
     private final Map<Class<? extends Packet<T>>, UnsafeFunction<ObjectInputStream, ? extends Packet<T>>> packetFactories = new HashMap<>();
@@ -77,10 +87,6 @@ public class PacketHandler<T extends PacketListener> {
         int id = inputStream.readInt();
         return createPacket(id, inputStream);
     }
-
-//    public Iterator<Class<? extends Packet<?>>> getPacketTypes() {
-//        return this.idsByPacket.keySet().iterator();
-//    }
 
     public static <T extends PacketListener> void handlePacket(Packet<T> packet, T listener) {
         packet.apply(listener);

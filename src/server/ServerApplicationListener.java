@@ -2,7 +2,7 @@ package server;
 
 import core.ExceptionOccurredListener;
 
-public interface ServerUserInterface extends ExceptionOccurredListener {
+public interface ServerApplicationListener extends ExceptionOccurredListener {
     void onServerStart();
 
     void onClientJoin(ClientConnectionHandler client);
