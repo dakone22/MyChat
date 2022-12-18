@@ -32,8 +32,8 @@ public class Sender<T extends PacketListener> implements Runnable {
             packetHandler.sendPacket(outputStream, packet);
             outputStream.flush();
         } catch (IOException e) {
-            running = false;
             outputStream.close();
+            stop();
             throw e;
         }
     }
@@ -45,14 +45,20 @@ public class Sender<T extends PacketListener> implements Runnable {
                 var msg = messageQueue.take();
                 sendImmediately(msg);
             }
-        } catch (InterruptedException | IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            stop();
         }
     }
 
     public void send(Packet<? extends T> msg) throws InterruptedException {
         if (!messageQueue.add(msg))  // TODO: stress test
             throw new InterruptedException();
+    }
+
+    public void stop() {
+        running = false;
     }
 
 }

@@ -21,19 +21,22 @@ public class PacketHandler<T extends PacketListener> {
             .register(SystemMessageS2CPacket.class)
             .register(ClientJoinS2CPacket.class)
             .register(ClientLeaveS2CPacket.class)
+            .register(ChatUserListS2CPacket.class)
             .register(PublicChatMessageS2CPacket.class)
             .register(PrivateChatMessageS2CPacket.class)
             .register(CustomSystemMessageS2CPacket.class)
             .register(ConnectedSuccessS2CPacket .class)
             .register(ConnectedFailureS2CPacket.class)
             .register(DisconnectedS2CPacket.class)
+            .register(LoginRequestS2CPacket.class)
     );
 
     public static PacketHandler<ServerPacketListener> C2S_PACKET_HANDLER = (new PacketHandler<ServerPacketListener>()
             .register(PublicChatMessageC2SPacket.class)
             .register(PrivateChatMessageC2SPacket.class)
-            .register(HandshakeC2SPacket.class)
+            .register(LoginC2SPacket.class)
             .register(DisconnectC2SPacket.class)
+            .register(ChatUserListC2SPacket.class)
     );
 
     private final Map<Integer, Class<? extends Packet<T>>> packetsById = new HashMap<>();
@@ -49,7 +52,10 @@ public class PacketHandler<T extends PacketListener> {
     }
 
     private Integer getId(Class<?> packet) {
-        return this.idsByPacket.getOrDefault(packet, null);
+        if (!this.idsByPacket.containsKey(packet))
+            throw new RuntimeException("Unregistered packet class " + packet.toString());
+
+        return this.idsByPacket.get(packet);
     }
 
     private Packet<T> createPacket(int id, ObjectInputStream istream) throws IOException, ClassNotFoundException {
@@ -58,11 +64,14 @@ public class PacketHandler<T extends PacketListener> {
         if (packetClass == null)
             return null;
 
+        System.out.printf("Receiving packet %d %s\n", id, packetClass);
+
         return packetClass.cast(istream.readObject());
     }
 
     public void sendPacket(ObjectOutputStream outputStream, Packet<? extends T> packet) throws IOException {
         int id = getId(packet.getClass());
+        System.out.printf("Sending packet %d %s\n", id, packet.getClass());
         outputStream.writeInt(id);
         outputStream.writeObject(packet);
     }

@@ -13,11 +13,12 @@ import java.util.List;
 public class Connection<R extends PacketListener, S extends PacketListener> {  // R - receivable (получаемые)
     // S - sendable (отправляемые)
     protected Socket socket;
-    protected Thread senderThread;
-    protected Sender<S> sender;
-    protected Thread receiverThread;
+    private Thread senderThread;
+    private Sender<S> sender;
+    private Receiver<R> receiver;
+    private Thread receiverThread;
 
-    protected ExceptionOccurredListener exceptionOccurredListener = null;
+    private ExceptionOccurredListener exceptionOccurredListener = null;
 
     public void addExceptionOccurredListener(ExceptionOccurredListener listener) {
         exceptionOccurredListener = listener;
@@ -31,7 +32,7 @@ public class Connection<R extends PacketListener, S extends PacketListener> {  /
 
     protected void startConnection(Socket socket, PacketHandler<S> packetSenderHandler, PacketHandler<R> packetReceiverHandler, R listener) throws IOException {
         sender = new Sender<>(socket.getOutputStream(), packetSenderHandler);
-        var receiver = new Receiver<>(socket.getInputStream(), packetReceiverHandler, listener);
+        receiver = new Receiver<>(socket.getInputStream(), packetReceiverHandler, listener);
 
         senderThread = new Thread(sender);
         receiverThread = new Thread(receiver);
@@ -43,6 +44,15 @@ public class Connection<R extends PacketListener, S extends PacketListener> {  /
     }
 
     public void stop() throws IOException {
+        sender.stop();
+        receiver.stop();
+
+        try {
+            senderThread.join(10 * 1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         for (var t : List.of(new Thread[]{senderThread, receiverThread}))
             if (t != null && !t.isInterrupted())
                 t.interrupt();

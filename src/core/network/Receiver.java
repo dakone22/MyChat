@@ -28,9 +28,11 @@ public class Receiver<T extends PacketListener> implements Runnable {
 
             PacketHandler.handlePacket(packet, listener);
         } catch (IOException | ClassNotFoundException e) {
-            running = false;
             inputStream.close();
-            throw e;
+            if (running) {
+                stop();
+                throw e;
+            }
         }
     }
 
@@ -43,5 +45,9 @@ public class Receiver<T extends PacketListener> implements Runnable {
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void stop() {
+        running = false;
     }
 }

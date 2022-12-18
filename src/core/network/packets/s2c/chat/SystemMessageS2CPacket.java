@@ -6,7 +6,7 @@ import core.network.packets.Packet;
 @Deprecated
 public record SystemMessageS2CPacket(MessageType messageType) implements Packet<ClientPacketListener> {
     public enum MessageType {
-        PromotedToAdmin, PromotedToModerator,
+        PromotedToAdmin, PromotedToModerator, ErrorNoSuchUser
         // ...
     }
 

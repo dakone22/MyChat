@@ -7,9 +7,7 @@ import core.network.packets.s2c.chat.SystemMessageS2CPacket;
 import core.network.packets.s2c.service.ConnectedFailureS2CPacket;
 import core.network.packets.s2c.service.DisconnectedS2CPacket;
 
-import java.util.List;
-
-public interface ClientApplicationListener extends ExceptionOccurredListener {
+public interface ClientUIUpdater extends ExceptionOccurredListener {
     void onCustomMessage(String message);
 
     void publicMessage(User sender, String message);
@@ -22,7 +20,7 @@ public interface ClientApplicationListener extends ExceptionOccurredListener {
 
     void connected(User assignedUser);
 
-    void updateUserList(List<User> userList);
+    void updateUserList(Iterable<User> userList);
 
     void disconnected(DisconnectedS2CPacket.DisconnectReason reason);
 

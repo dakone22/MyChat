@@ -11,11 +11,11 @@ import java.net.Socket;
 import static core.network.PacketHandler.C2S_PACKET_HANDLER;
 import static core.network.PacketHandler.S2C_PACKET_HANDLER;
 
-public class ClientConnection extends Connection<ClientPacketListener, ServerPacketListener> {
+public class ClientNetwork extends Connection<ClientPacketListener, ServerPacketListener> {
 
-    private final ClientConnectionListener clientPacketListener;
+    private final ClientPacketReceivable clientPacketListener;
 
-    public ClientConnection(ClientConnectionListener listener) {
+    public ClientNetwork(ClientPacketReceivable listener) {
         this.clientPacketListener = listener;
     }
 

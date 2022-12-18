@@ -1,38 +1,37 @@
 package client;
 
+import core.PasswordHasher;
 import core.User;
 import core.network.listeners.ServerPacketListener;
 import core.network.packets.Packet;
-import core.network.packets.c2s.chat.ChatUserListC2SPacket;
-import core.network.packets.c2s.chat.PrivateChatMessageC2SPacket;
-import core.network.packets.c2s.chat.PublicChatMessageC2SPacket;
-import core.network.packets.c2s.service.DisconnectC2SPacket;
+import core.network.packets.c2s.chat.*;
+import core.network.packets.c2s.service.*;
 import core.network.packets.s2c.chat.*;
-import core.network.packets.s2c.service.ConnectedFailureS2CPacket;
-import core.network.packets.s2c.service.ConnectedSuccessS2CPacket;
-import core.network.packets.s2c.service.DisconnectedS2CPacket;
+import core.network.packets.s2c.service.*;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientApplication {
-    private final ClientApplicationListener output;
-    private final ClientConnection networkHandler;
+public class ClientController {
+    private final ClientUIUpdater output;
+    private final ClientNetwork networkHandler;
 
     private User currentUserData;
     private List<User> userList;
     private boolean isConnected = false;
+    private String passwordHash;
+    private String username;
 
-    public ClientApplication(ClientApplicationListener clientApplicationListener) {
-        output = clientApplicationListener;
+    public ClientController(ClientUIUpdater uiUpdater) {
+        output = uiUpdater;
 
-        networkHandler = new ClientConnection(setupConnectionListener());
+        networkHandler = new ClientNetwork(setupConnectionListener());
         networkHandler.addExceptionOccurredListener(output);
     }
 
-    private ClientConnectionListener setupConnectionListener() {
-        return new ClientConnectionListener() {
+    private ClientPacketReceivable setupConnectionListener() {
+        return new ClientPacketReceivable() {
             @Override
             public void onPublicMessage(PublicChatMessageS2CPacket packet) {
                 // TODO: check sender
@@ -79,22 +78,27 @@ public class ClientApplication {
 
             @Override
             public void onConnectFailed(ConnectedFailureS2CPacket packet) {
-                output.connectFailed(packet.failReason());
                 stop();
+                output.connectFailed(packet.failReason());
             }
 
             @Override
             public void onDisconnected(DisconnectedS2CPacket packet) {
-                output.disconnected(packet.reason());
                 stop();
+                output.disconnected(packet.reason());
             }
 
             @Override
-            public void onUserListRequest(ChatUserListS2CPacket packet) {
-                userList = packet.userList();
+            public void onUserListResponse(ChatUserListS2CPacket packet) {
+                userList = List.copyOf(packet.userList());
                 List<User> filteredUserList = new ArrayList<>(userList);
                 filteredUserList.remove(currentUserData);
                 output.updateUserList(filteredUserList);
+            }
+
+            @Override
+            public void onLoginRequest(LoginRequestS2CPacket packet) {
+                sendPacket(new LoginC2SPacket(new User(null, username), passwordHash));
             }
         };
     }
@@ -120,10 +124,12 @@ public class ClientApplication {
         sendPacket(new ChatUserListC2SPacket());
     }
 
-    public void connect(String host, int port) {
+    public void connect(String host, int port, String password, String username) {
         if (isConnected) return;
         try {
             networkHandler.connect(InetAddress.getByName(host), port);
+            this.passwordHash = PasswordHasher.getHashedPassword(password);
+            this.username = username;
         } catch (Exception e) {
             output.exceptionOccurred(this, e);
         }
