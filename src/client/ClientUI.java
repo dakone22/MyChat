@@ -8,6 +8,10 @@ import core.network.packets.s2c.service.ConnectedFailureS2CPacket;
 import core.network.packets.s2c.service.DisconnectedS2CPacket;
 
 import javax.swing.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 
 public class ClientUI {
@@ -16,20 +20,7 @@ public class ClientUI {
     public ClientUI() {
         window = new ClientWindow();
 
-        final var app = new ClientController(getApplicationListener());
-
-        window.btnConnect.addActionListener(e -> app.connect(
-                window.tfHost.getText(),
-                Integer.parseInt(window.tfPort.getText()),
-                new String(window.passwordField.getPassword()),
-                window.tfUsername.getText()));
-        window.btnSend.addActionListener(e -> app.sendPublicMessage(window.tfMessage.getText()));
-
-        window.setVisible(true);
-    }
-
-    private ClientUIUpdater getApplicationListener() {
-        return new ClientUIUpdater() {
+        final var app = new ClientController(new ClientUIUpdater() {
             @Override
             public void onCustomMessage(String message) {
                 window.log.addSystemMessage(message);
@@ -64,6 +55,27 @@ public class ClientUI {
                 window.log.addSystemMessage("Joined to server as %s".formatted(
                         assignedUser.username()
                 ));
+                window.setState(ClientWindow.State.Connected);
+            }
+
+            @Override
+            public void forceDisconnected(DisconnectedS2CPacket.DisconnectReason reason) {
+                window.log.addSystemMessage("Disconnected from server: %s".formatted(
+                        reason.toString()
+                ));
+                window.setState(ClientWindow.State.Disconnected);
+            }
+
+            @Override
+            public void connectFailed(ConnectedFailureS2CPacket.FailReason failReason) {
+                window.log.addSystemMessage("Connection Refused: %s".formatted(failReason.toString()));
+                window.setState(ClientWindow.State.Disconnected);
+            }
+
+            @Override
+            public void disconnected() {
+                window.log.addSystemMessage("Disconnected");
+                window.setState(ClientWindow.State.Disconnected);
             }
 
             @Override
@@ -71,14 +83,9 @@ public class ClientUI {
                 DefaultListModel<User> listModel = (DefaultListModel<User>) window.listUsers.getModel();
                 listModel.removeAllElements();
 
-                for (var user : userList) { listModel.addElement(user); }
-            }
-
-            @Override
-            public void disconnected(DisconnectedS2CPacket.DisconnectReason reason) {
-                window.log.addSystemMessage("Disconnected from server: %s".formatted(
-                        reason.toString()
-                ));
+                for (var user : userList) {
+                    listModel.addElement(user);
+                }
             }
 
             @Override
@@ -87,14 +94,41 @@ public class ClientUI {
             }
 
             @Override
-            public void connectFailed(ConnectedFailureS2CPacket.FailReason failReason) {
-                window.log.addSystemMessage("Connection Refused: %s".formatted(failReason.toString()));
-            }
-
-            @Override
-            public void exceptionOccurred(Object sender, Throwable e) {
+            public void exceptionOccurred(Object source, Throwable e) {
                 window.log.addErrorMessage(e);
             }
-        };
+        });
+
+        window.btnConnect.addActionListener(e -> app.connect(
+                window.tfHost.getText(),
+                Integer.parseInt(window.tfPort.getText()),
+                new String(window.passwordField.getPassword()),
+                window.tfUsername.getText()
+        ));
+
+        window.btnSend.addActionListener(e -> {
+            app.sendPublicMessage(window.tfMessage.getText());
+            window.tfMessage.setText("");
+        });
+
+        window.btnDisconnect.addActionListener(e -> app.softDisconnect());
+
+        window.tfMessage.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) window.btnSend.doClick();
+            }
+        });
+
+        window.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                app.softDisconnect();
+                System.exit(0);
+            }
+        });
+
+
+        window.setVisible(true);
     }
 }

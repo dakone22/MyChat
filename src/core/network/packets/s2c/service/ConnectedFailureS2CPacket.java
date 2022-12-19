@@ -6,7 +6,7 @@ import core.network.packets.Packet;
 public record ConnectedFailureS2CPacket(FailReason failReason) implements Packet<ClientPacketListener> {
 
     public enum FailReason {
-        UsernameAlreadyTaken, Banned, InvalidPassword
+        UsernameAlreadyTaken, Banned, ErrorOccurred, InvalidPassword
     }
 
     @Override

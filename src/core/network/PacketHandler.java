@@ -53,7 +53,7 @@ public class PacketHandler<T extends PacketListener> {
 
     private Integer getId(Class<?> packet) {
         if (!this.idsByPacket.containsKey(packet))
-            throw new RuntimeException("Unregistered packet class " + packet.toString());
+            (new RuntimeException("Unregistered packet class " + packet.toString())).printStackTrace();
 
         return this.idsByPacket.get(packet);
     }

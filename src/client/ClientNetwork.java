@@ -20,8 +20,6 @@ public class ClientNetwork extends Connection<ClientPacketListener, ServerPacket
     }
 
     public void connect(InetAddress host, int port) throws IOException {
-        // TODO: if (connected) return;
-
         socket = new Socket(host, port);
         startConnection(socket, C2S_PACKET_HANDLER, S2C_PACKET_HANDLER, clientPacketListener);
     }

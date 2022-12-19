@@ -10,7 +10,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Sender<T extends PacketListener> implements Runnable {
-    private final BlockingQueue<Packet<? extends T>> messageQueue;
+    private final BlockingQueue<Packet<? extends T>> packetQueue;
     private final ObjectOutputStream outputStream;
     private final PacketHandler<T> packetHandler;
     private boolean running;
@@ -19,15 +19,13 @@ public class Sender<T extends PacketListener> implements Runnable {
     public Sender(OutputStream outputStream, PacketHandler<T> packetHandler) throws IOException {
         this.packetHandler = packetHandler;
 
-        this.messageQueue = new LinkedBlockingQueue<>();
+        this.packetQueue = new LinkedBlockingQueue<>();
         this.outputStream = new ObjectOutputStream(outputStream);
 
         running = true;
     }
 
     private void sendImmediately(Packet<? extends T> packet) throws IOException {
-        if (!running) return;
-
         try {
             packetHandler.sendPacket(outputStream, packet);
             outputStream.flush();
@@ -42,8 +40,9 @@ public class Sender<T extends PacketListener> implements Runnable {
     public void run() {
         try {
             while (running) {
-                var msg = messageQueue.take();
-                sendImmediately(msg);
+                var packet = packetQueue.take();
+                System.out.println("Get new packet from queue: " + packet);
+                sendImmediately(packet);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -52,12 +51,14 @@ public class Sender<T extends PacketListener> implements Runnable {
         }
     }
 
-    public void send(Packet<? extends T> msg) throws InterruptedException {
-        if (!messageQueue.add(msg))  // TODO: stress test
+    public void send(Packet<? extends T> packet) throws InterruptedException {
+        System.out.println("Add to message queue " + packet);
+        if (!packetQueue.add(packet))  // TODO: stress test
             throw new InterruptedException();
     }
 
     public void stop() {
+        System.out.println("Stopping sender " + this + " " + Thread.currentThread());
         running = false;
     }
 

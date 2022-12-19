@@ -85,7 +85,7 @@ public class ClientController {
             @Override
             public void onDisconnected(DisconnectedS2CPacket packet) {
                 stop();
-                output.disconnected(packet.reason());
+                output.forceDisconnected(packet.reason());
             }
 
             @Override
@@ -112,8 +112,11 @@ public class ClientController {
     }
 
     private void stop() {
+        stop(false);
+    }
+    private void stop(boolean flush) {
         try {
-            networkHandler.stop();
+            networkHandler.stop(flush);
             isConnected = false;
         } catch (Exception e) {
             output.exceptionOccurred(this, e);
@@ -127,18 +130,19 @@ public class ClientController {
     public void connect(String host, int port, String password, String username) {
         if (isConnected) return;
         try {
-            networkHandler.connect(InetAddress.getByName(host), port);
             this.passwordHash = PasswordHasher.getHashedPassword(password);
             this.username = username;
+            networkHandler.connect(InetAddress.getByName(host), port);
         } catch (Exception e) {
             output.exceptionOccurred(this, e);
         }
     }
 
-    public void disconnect() {
+    public void softDisconnect() {
         if (!isConnected) return;
         sendPacket(new DisconnectC2SPacket());
-        stop();
+        stop(true);
+        output.disconnected();
     }
 
     public void sendPublicMessage(String message) {

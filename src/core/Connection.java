@@ -10,7 +10,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 
-public class Connection<R extends PacketListener, S extends PacketListener> {  // R - receivable (получаемые)
+public class Connection<R extends PacketListener, S extends PacketListener> {
+    // R - receivable (получаемые)
     // S - sendable (отправляемые)
     protected Socket socket;
     private Thread senderThread;
@@ -26,7 +27,7 @@ public class Connection<R extends PacketListener, S extends PacketListener> {  /
 
     protected void throwException(Object sender, Throwable e) {
         if (exceptionOccurredListener == null)
-            throw new RuntimeException(e);
+            e.printStackTrace();
         exceptionOccurredListener.exceptionOccurred(sender, e);
     }
 
@@ -44,13 +45,19 @@ public class Connection<R extends PacketListener, S extends PacketListener> {  /
     }
 
     public void stop() throws IOException {
+        stop(false);
+    }
+
+    public void stop(boolean flush) throws IOException {
         sender.stop();
         receiver.stop();
 
-        try {
-            senderThread.join(10 * 1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        if (flush) {
+            try {
+                senderThread.join(10 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         for (var t : List.of(new Thread[]{senderThread, receiverThread}))

@@ -22,9 +22,11 @@ public interface ClientUIUpdater extends ExceptionOccurredListener {
 
     void updateUserList(Iterable<User> userList);
 
-    void disconnected(DisconnectedS2CPacket.DisconnectReason reason);
+    void forceDisconnected(DisconnectedS2CPacket.DisconnectReason reason);
 
     void systemMessage(SystemMessageS2CPacket.MessageType messageType);
 
     void connectFailed(ConnectedFailureS2CPacket.FailReason failReason);
+
+    void disconnected();
 }

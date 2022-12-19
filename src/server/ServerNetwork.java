@@ -26,11 +26,13 @@ public class ServerNetwork {
         this.listener = listener;
     }
 
+    private boolean running;
+
     private void acceptNewClient(Socket clientSocket) throws IOException {
         var client = new ClientConnectionHandler(clientSocket);
 
-        client.addExceptionOccurredListener((sender, exception) -> {
-            clients.remove(client);
+        client.addExceptionOccurredListener((source, exception) -> {
+//            clients.remove(client);
             listener.onClientExceptionDisconnected(client, exception);
 
 //            listener.exceptionOccurred(sender, exception);
@@ -70,6 +72,7 @@ public class ServerNetwork {
 
     public void start(int port) throws IOException {
         serverSocket = new ServerSocket(port);
+        running = true;
 
         var acceptionThread = new Thread(() -> {
             try {
@@ -78,7 +81,7 @@ public class ServerNetwork {
                     acceptNewClient(clientSocket);
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                if (running) { listener.exceptionOccurred(this, e); }
             }
         });
         acceptionThread.setUncaughtExceptionHandler(listener::exceptionOccurred);
@@ -90,6 +93,7 @@ public class ServerNetwork {
 
     public void stop() throws IOException {
         if (serverSocket == null || serverSocket.isClosed()) return;
+        running = false;
 
         for (var c : clients) {
             c.stop();
@@ -126,12 +130,21 @@ public class ServerNetwork {
         send(this.clients, packet);
     }
 
-    public void forceDisconnect(ClientConnectionHandler client) {
+    public void forceDisconnect(ClientConnectionHandler client, boolean flush) {
         try {
-            client.stop();
+            client.stop(flush);
         } catch (IOException e) {
             listener.exceptionOccurred(client, e);
         }
         clients.remove(client);
+    }
+
+    public void sendAndDisconnect(ClientConnectionHandler client, Packet<? extends ClientPacketListener> packet) {
+        send(client, packet);
+        forceDisconnect(client, true);
+    }
+
+    public void forceDisconnect(ClientConnectionHandler client) {
+        forceDisconnect(client, false);
     }
 }

@@ -4,6 +4,7 @@ import client.gui.ChatLog;
 import core.User;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class ServerWindow extends JFrame {
     private JPanel pMain;
@@ -20,6 +21,7 @@ public class ServerWindow extends JFrame {
     private JPanel ChatPanel;
     private JPanel SidePanel;
     private JPanel SendPanel;
+    public JButton btnStop;
 
     public ChatLog log;
 
@@ -28,7 +30,48 @@ public class ServerWindow extends JFrame {
         setTitle("ClientConnectionHandler");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setContentPane(pMain);
+        listUsers.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                // Cast the value to a User object
+                User user = (User) value;
+
+                // Use the DefaultListCellRenderer to render the component
+                JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                // Customize the rendering of the component
+                label.setText(user.username());
+
+                return label;
+            }
+        });
+
+        setState(State.Stopped);
+
         log = new ChatLog(jTextPane, user -> listUsers.setSelectedValue(user, true));
+    }
+
+    public enum State {
+        Running, Stopped
+    }
+
+    public void setState(State state) {
+        switch (state) {
+            case Running -> setElementsState(true);
+            case Stopped -> setElementsState(false);
+        }
+    }
+
+    private void setElementsState(boolean isRunning) {
+        btnStart.setEnabled(!isRunning);
+        btnStart.setVisible(!isRunning);
+
+        tfPort.setEnabled(!isRunning);
+        passwordField.setEnabled(!isRunning);
+
+        btnSend.setEnabled(isRunning);
+        btnStop.setVisible(isRunning);
+        btnStop.setEnabled(isRunning);
     }
 
 }

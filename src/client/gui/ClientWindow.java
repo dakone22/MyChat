@@ -3,6 +3,7 @@ package client.gui;
 import core.User;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class ClientWindow extends JFrame {
     private JPanel pMain;
@@ -23,56 +24,62 @@ public class ClientWindow extends JFrame {
     private JPanel ChatPanel;
     private JPanel SidePanel;
     private JPanel SendPanel;
+    public JButton btnDisconnect;
 
     public ChatLog log;
 
     public ClientWindow() {
-//            btnSendMessage = new JButton("Отправить");
-//            btnStart = new JButton("Присоедениться");
-//            tfHost = new JTextField("localhost");
-//            tfPort = new JTextField("1234");
-//            tfMessage = new JTextField();
-//            taLog = new JTextArea();
-//            taLog.setEditable(false);
-//            taLog.setLineWrap(true);
-
-
-        // add UI elements to window
-//            add(new JScrollPane(messageLog), BorderLayout.CENTER);
-//            JPanel sendPanel = new JPanel();
-//            sendPanel.add(messageField);
-//            sendPanel.add(sendButton);
-//            add(sendPanel, BorderLayout.SOUTH);
-//            JPanel connectPanel = new JPanel();
-//            connectPanel.add(new JLabel("Host:"));
-//            connectPanel.add(hostField);
-//            connectPanel.add(new JLabel("Port:"));
-//            connectPanel.add(portField);
-//            connectPanel.add(connectButton);
-//            add(connectPanel, BorderLayout.EAST);
-
-
         setBounds(600, 300, 800, 500);
-        setTitle("ClientConnectionHandler");
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Client");
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         setContentPane(pMain);
-//        pack();
-//
-//            var jsp = new JScrollPane(taLog);
-//            this.add(jsp, BorderLayout.CENTER);
-//
-//            var bottomPanel = new JPanel(new BorderLayout());
-//            this.add(bottomPanel, BorderLayout.SOUTH);
-//            bottomPanel.add(btnSendMessage, BorderLayout.EAST);
-//            bottomPanel.add(tfMessage, BorderLayout.CENTER);
-//
-//            var eastPanel = new JPanel(new GridLayout(3, 1));
-//            this.add(eastPanel, BorderLayout.EAST);
-//            eastPanel.add(tfHost);
-//            eastPanel.add(tfPort);
-//            eastPanel.add(btnStart);
-        log = new ChatLog(jTextPane, user -> listUsers.setSelectedValue(user, true));
+        listUsers.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                // Cast the value to a User object
+                User user = (User) value;
 
+                // Use the DefaultListCellRenderer to render the component
+                JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                // Customize the rendering of the component
+                label.setText(user.username());
+
+                return label;
+            }
+        });
+
+        setState(State.Disconnected);
+
+        log = new ChatLog(jTextPane, user -> listUsers.setSelectedValue(user, true));
     }
 
+    public enum State {
+        Connected, Disconnected
+    }
+
+    public void setState(State state) {
+        switch (state) {
+            case Connected -> setElementsState(true);
+            case Disconnected -> {
+                setElementsState(false);
+                ((DefaultListModel<User>) listUsers.getModel()).clear();
+            }
+        }
+    }
+
+    private void setElementsState(boolean isConnected) {
+        btnConnect.setEnabled(!isConnected);
+        btnConnect.setVisible(!isConnected);
+
+        tfHost.setEnabled(!isConnected);
+        tfPort.setEnabled(!isConnected);
+        passwordField.setEnabled(!isConnected);
+        tfUsername.setEnabled(!isConnected);
+
+        tfMessage.setEnabled(isConnected);
+        btnSend.setEnabled(isConnected);
+        btnDisconnect.setVisible(isConnected);
+        btnDisconnect.setEnabled(isConnected);
+    }
 }

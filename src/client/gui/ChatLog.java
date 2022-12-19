@@ -10,7 +10,8 @@ import java.awt.event.MouseListener;
 
 
 public class ChatLog {
-    record UsernameLink(User user) {}
+    record UsernameLink(User user) {
+    }
 
     public interface UserClickedListener {
 
@@ -35,17 +36,26 @@ public class ChatLog {
                 Element element = doc.getCharacterElement(jTextPane.viewToModel2D(e.getPoint()));
                 AttributeSet as = element.getAttributes();
                 UsernameLink fla = (UsernameLink) as.getAttribute("linkact");
-                if (fla != null) { listener.onUserClick(fla.user()); }
+                if (fla != null) {
+                    listener.onUserClick(fla.user());
+                }
             }
 
             @Override
-            public void mousePressed(MouseEvent e) { }
+            public void mousePressed(MouseEvent e) {
+            }
+
             @Override
-            public void mouseReleased(MouseEvent e) { }
+            public void mouseReleased(MouseEvent e) {
+            }
+
             @Override
-            public void mouseEntered(MouseEvent e) { }
+            public void mouseEntered(MouseEvent e) {
+            }
+
             @Override
-            public void mouseExited(MouseEvent e) { }
+            public void mouseExited(MouseEvent e) {
+            }
         });
 
 
@@ -62,10 +72,10 @@ public class ChatLog {
         StyleConstants.setItalic(privateMessageStyle, true);
 
         systemMessageStyle = doc.addStyle("system", messageStyle);
-        StyleConstants.setForeground(systemMessageStyle, Color.ORANGE);
+        StyleConstants.setForeground(systemMessageStyle, Color.BLUE);
 
         errorMessageStyle = doc.addStyle("error", messageStyle);
-        StyleConstants.setForeground(errorMessageStyle, Color.red);
+        StyleConstants.setForeground(errorMessageStyle, Color.RED);
     }
 
     private void addStyledText(String text, Style style) {
