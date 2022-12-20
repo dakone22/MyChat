@@ -3,6 +3,8 @@ package server;
 import core.User;
 
 import javax.swing.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -74,7 +76,21 @@ public class ServerUI {
         });
 
         window.btnStart.addActionListener(e -> app.start(Integer.parseInt(window.tfPort.getText()), new String(window.passwordField.getPassword())));
-        window.btnSend.addActionListener(e -> app.send(window.tfMessage.getText()));
+
+        window.btnSend.addActionListener(e -> {
+            String msg = window.tfMessage.getText();
+            if (window.listUsers.isSelectionEmpty()) {
+                app.sendCustomMessage(msg);
+            } else {
+                app.sendCustomMessage(window.listUsers.getSelectedValue(), msg);
+            }
+            window.tfMessage.setText("");
+        });
+
+        window.btnKick.addActionListener(e -> {
+            app.kickUser(window.listUsers.getSelectedValue());
+        });
+
         window.btnStop.addActionListener(e -> app.stop());
 
         window.addWindowListener(new WindowAdapter() {
@@ -84,6 +100,15 @@ public class ServerUI {
                 System.exit(0);
             }
         });
+
+        window.tfMessage.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) window.btnSend.doClick();
+            }
+        });
+
+
 
         window.setVisible(true);
     }

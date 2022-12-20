@@ -64,9 +64,10 @@ public class PacketHandler<T extends PacketListener> {
         if (packetClass == null)
             return null;
 
-        System.out.printf("Receiving packet %d %s\n", id, packetClass);
+        var result = packetClass.cast(istream.readObject());
+        System.out.printf("Receiving packet %s\n", result.toString());
 
-        return packetClass.cast(istream.readObject());
+        return result;
     }
 
     public void sendPacket(ObjectOutputStream outputStream, Packet<? extends T> packet) throws IOException {

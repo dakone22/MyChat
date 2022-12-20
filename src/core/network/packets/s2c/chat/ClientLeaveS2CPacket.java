@@ -4,9 +4,9 @@ import core.User;
 import core.network.listeners.ClientPacketListener;
 import core.network.packets.Packet;
 
-public record ClientLeaveS2CPacket(User user, DisconnectReason reason) implements Packet<ClientPacketListener> {
-    public enum DisconnectReason {
-        SelfDisconnect, Error
+public record ClientLeaveS2CPacket(User user, LeaveReason reason) implements Packet<ClientPacketListener> {
+    public enum LeaveReason {
+        SelfDisconnect, Kicked, ErrorOccurred
     }
 
     @Override

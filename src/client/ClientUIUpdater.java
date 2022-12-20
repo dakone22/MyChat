@@ -16,7 +16,7 @@ public interface ClientUIUpdater extends ExceptionOccurredListener {
 
     void clientJoined(User user);
 
-    void clientLeft(User user, ClientLeaveS2CPacket.DisconnectReason reason);
+    void clientLeft(User user, ClientLeaveS2CPacket.LeaveReason reason);
 
     void connected(User assignedUser);
 

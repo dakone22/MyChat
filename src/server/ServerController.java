@@ -56,13 +56,18 @@ public class ServerController {
             @Override
             public void onPrivateMessage(ClientConnectionHandler senderClient, User receiverUser, String message) {
                 User senderUser;
-                synchronized (users) { senderUser = getUser(senderClient); }
-                if (senderUser == null) {
-                    (new RuntimeException("Got private message %s from unknown client %s to %s".formatted(message, senderClient.toString(), receiverUser.toString()))).printStackTrace();
-                }
-
                 ClientConnectionHandler receiverClient;
-                synchronized (users) { receiverClient = getClient(receiverUser); }
+                synchronized (users) {
+                    senderUser = getUser(senderClient);
+                    if (senderUser == null) {
+                        (new RuntimeException("Got private message %s from unknown client %s to %s".formatted(message, senderClient.toString(), receiverUser.toString()))).printStackTrace();
+                    }
+
+                    receiverClient = getClient(receiverUser);
+                    if (receiverClient == null) {
+                        (new RuntimeException("Got private message %s from %s to unknown client %s".formatted(message, senderClient.toString(), receiverUser.toString()))).printStackTrace();
+                    }
+                }
 
                 if (receiverClient == null) {
                     serverNetwork.send(senderClient, new SystemMessageS2CPacket(SystemMessageS2CPacket.MessageType.ErrorNoSuchUser));
@@ -83,8 +88,8 @@ public class ServerController {
                     removeUser(user);
                 }
 
-                serverNetwork.sendAndDisconnect(client, new ConnectedFailureS2CPacket(ConnectedFailureS2CPacket.FailReason.ErrorOccurred));
-                serverNetwork.sendAll(new ClientLeaveS2CPacket(user, ClientLeaveS2CPacket.DisconnectReason.Error));
+                serverNetwork.sendAndDisconnect(client, new DisconnectedS2CPacket(DisconnectedS2CPacket.DisconnectReason.ErrorOccurred));
+                serverNetwork.sendAll(new ClientLeaveS2CPacket(user, ClientLeaveS2CPacket.LeaveReason.ErrorOccurred));
                 output.onClientExceptionDisconnected(user, exception);
                 output.updateUserList(users.values());
             }
@@ -101,7 +106,7 @@ public class ServerController {
                     removeUser(user);
                 }
                 serverNetwork.forceDisconnect(client);
-                serverNetwork.sendAll(new ClientLeaveS2CPacket(user, ClientLeaveS2CPacket.DisconnectReason.SelfDisconnect));
+                serverNetwork.sendAll(new ClientLeaveS2CPacket(user, ClientLeaveS2CPacket.LeaveReason.SelfDisconnect));
                 output.onClientLeft(user);
                 output.updateUserList(getUsers());
             }
@@ -183,9 +188,8 @@ public class ServerController {
     }
 
     private void removeUser(User user) {
-        for (var entry : users.entrySet()) {
-            if (entry.getValue().equals(user)) { users.remove(entry.getKey()); }
-        }
+        var client = getClient(user);
+        users.remove(client);
     }
 
     private User getUser(ClientConnectionHandler client) {
@@ -194,7 +198,7 @@ public class ServerController {
 
     private ClientConnectionHandler getClient(User user) {
         for (var entry : users.entrySet())
-            if (entry.getValue() == user)
+            if (entry.getValue().equals(user))
                 return entry.getKey();
         return null;
     }
@@ -230,11 +234,37 @@ public class ServerController {
         }
     }
 
-    public void send(String text) {
+    public void sendCustomMessage(String text) {
         serverNetwork.sendAll(new CustomSystemMessageS2CPacket(text));
     }
 
     public Iterable<User> getUsers() {
         return users.values();
+    }
+
+    public void kickUser(User user) {
+        ClientConnectionHandler client;
+        synchronized (users) {
+            client = getClient(user);
+            if (client == null)
+                (new RuntimeException("Kicking unknown user %s.".formatted(user.toString()))).printStackTrace();
+            removeUser(user);
+        }
+
+        serverNetwork.sendAndDisconnect(client, new DisconnectedS2CPacket(DisconnectedS2CPacket.DisconnectReason.Kicked));
+        serverNetwork.sendAll(new ClientLeaveS2CPacket(user, ClientLeaveS2CPacket.LeaveReason.Kicked));
+        output.onClientLeft(user);
+        output.updateUserList(users.values());
+    }
+
+    public void sendCustomMessage(User user, String msg) {
+        ClientConnectionHandler client;
+        synchronized (users) {
+            client = getClient(user);
+            if (client == null)
+                (new RuntimeException("Sending pm to unknown user %s: %s.".formatted(user.toString(), msg))).printStackTrace();
+            removeUser(user);
+        }
+        serverNetwork.send(client, new CustomSystemMessageS2CPacket(msg));
     }
 }

@@ -122,7 +122,7 @@ public class ServerNetwork {
 //    public void sendAllExcept(ClientConnectionHandler clientException, Packet<? extends ClientPacketListener> packet) {
 //        for (var client : clients) {
 //            if (client == clientException) continue;
-//            send(client, packet);
+//            sendCustomMessage(client, packet);
 //        }
 //    }
 

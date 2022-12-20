@@ -25,6 +25,8 @@ public class ClientWindow extends JFrame {
     private JPanel SidePanel;
     private JPanel SendPanel;
     public JButton btnDisconnect;
+    private JButton btnUnselect;
+    private JPanel connectControlPanel;
 
     public ChatLog log;
 
@@ -36,22 +38,25 @@ public class ClientWindow extends JFrame {
         listUsers.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                // Cast the value to a User object
                 User user = (User) value;
-
-                // Use the DefaultListCellRenderer to render the component
                 JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-                // Customize the rendering of the component
                 label.setText(user.username());
-
                 return label;
             }
         });
 
+        listUsers.addListSelectionListener(e -> {
+            boolean selected = !listUsers.isSelectionEmpty();
+            btnUnselect.setEnabled(selected);
+            btnSend.setText(selected ? "Send PM" : "Send");
+        });
+        btnUnselect.addActionListener(e -> listUsers.clearSelection());
+
         setState(State.Disconnected);
 
         log = new ChatLog(jTextPane, user -> listUsers.setSelectedValue(user, true));
+
+
     }
 
     public enum State {

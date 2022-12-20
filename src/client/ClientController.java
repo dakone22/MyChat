@@ -4,10 +4,16 @@ import core.PasswordHasher;
 import core.User;
 import core.network.listeners.ServerPacketListener;
 import core.network.packets.Packet;
-import core.network.packets.c2s.chat.*;
-import core.network.packets.c2s.service.*;
+import core.network.packets.c2s.chat.ChatUserListC2SPacket;
+import core.network.packets.c2s.chat.PrivateChatMessageC2SPacket;
+import core.network.packets.c2s.chat.PublicChatMessageC2SPacket;
+import core.network.packets.c2s.service.DisconnectC2SPacket;
+import core.network.packets.c2s.service.LoginC2SPacket;
 import core.network.packets.s2c.chat.*;
-import core.network.packets.s2c.service.*;
+import core.network.packets.s2c.service.ConnectedFailureS2CPacket;
+import core.network.packets.s2c.service.ConnectedSuccessS2CPacket;
+import core.network.packets.s2c.service.DisconnectedS2CPacket;
+import core.network.packets.s2c.service.LoginRequestS2CPacket;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -27,7 +33,10 @@ public class ClientController {
         output = uiUpdater;
 
         networkHandler = new ClientNetwork(setupConnectionListener());
-        networkHandler.addExceptionOccurredListener(output);
+        networkHandler.addExceptionOccurredListener((source, exception) -> {
+            output.exceptionOccurred(source, exception);
+            stop();
+        });
     }
 
     private ClientPacketReceivable setupConnectionListener() {

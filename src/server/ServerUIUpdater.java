@@ -20,9 +20,7 @@ public interface ServerUIUpdater extends ExceptionOccurredListener {
 
     void updateUserList(Iterable<User> users);
 
-    @Deprecated
     void onAuthorizationTimeout(ClientConnectionHandler client);
 
-    @Deprecated
     void onAuthorizationFailed(ClientConnectionHandler client);
 }

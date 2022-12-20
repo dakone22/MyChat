@@ -5,7 +5,7 @@ import core.network.packets.Packet;
 
 public record DisconnectedS2CPacket(DisconnectReason reason) implements Packet<ClientPacketListener> {
     public enum DisconnectReason {
-        ServerClosed, Timeout
+        ServerClosed, Timeout, Kicked, ErrorOccurred
     }
 
     @Override

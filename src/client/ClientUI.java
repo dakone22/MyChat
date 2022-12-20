@@ -43,7 +43,7 @@ public class ClientUI {
             }
 
             @Override
-            public void clientLeft(User user, ClientLeaveS2CPacket.DisconnectReason reason) {
+            public void clientLeft(User user, ClientLeaveS2CPacket.LeaveReason reason) {
                 window.log.addSystemMessage("User %s left: %s\n".formatted(
                         user.username(),
                         reason.toString()
@@ -96,6 +96,7 @@ public class ClientUI {
             @Override
             public void exceptionOccurred(Object source, Throwable e) {
                 window.log.addErrorMessage(e);
+                window.setState(ClientWindow.State.Disconnected);
             }
         });
 
@@ -107,7 +108,11 @@ public class ClientUI {
         ));
 
         window.btnSend.addActionListener(e -> {
-            app.sendPublicMessage(window.tfMessage.getText());
+            if (window.listUsers.isSelectionEmpty()) {
+                app.sendPublicMessage(window.tfMessage.getText());
+            } else {
+                app.sendPrivateMessage(window.listUsers.getSelectedValue(), window.tfMessage.getText());
+            }
             window.tfMessage.setText("");
         });
 
