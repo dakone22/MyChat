@@ -10,10 +10,11 @@ import java.awt.event.WindowEvent;
 
 public class ServerUI {
     private final ServerWindow window;
+    private final ServerController app;
 
     public ServerUI() {
         window = new ServerWindow();
-        final var app = new ServerController(new ServerUIUpdater() {
+        app = new ServerController(new ServerUIUpdater() {
             @Override
             public void onServerStart() {
                 window.log.addSystemMessage("Start");
@@ -87,9 +88,7 @@ public class ServerUI {
             window.tfMessage.setText("");
         });
 
-        window.btnKick.addActionListener(e -> {
-            app.kickUser(window.listUsers.getSelectedValue());
-        });
+        window.btnKick.addActionListener(e -> app.kickUser(window.listUsers.getSelectedValue()));
 
         window.btnStop.addActionListener(e -> app.stop());
 

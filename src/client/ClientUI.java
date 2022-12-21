@@ -16,11 +16,12 @@ import java.awt.event.WindowEvent;
 
 public class ClientUI {
     private final ClientWindow window;
+    private final ClientController app;
 
     public ClientUI() {
         window = new ClientWindow();
 
-        final var app = new ClientController(new ClientUIUpdater() {
+        app = new ClientController(new ClientUIUpdater() {
             @Override
             public void onCustomMessage(String message) {
                 window.log.addSystemMessage(message);
