@@ -12,7 +12,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 public class ServerController {
-    public static final int AUTHORIZATION_TIMEOUT_DELAY_SECONDS = 10;
+    private static final int AUTHORIZATION_TIMEOUT_SECONDS = 10;
     private final ServerUIUpdater output;
     private final ServerNetwork serverNetwork;
 
@@ -137,7 +137,7 @@ public class ServerController {
                         }
 
                     }
-                }, AUTHORIZATION_TIMEOUT_DELAY_SECONDS * 1000);
+                }, AUTHORIZATION_TIMEOUT_SECONDS * 1000);
             }
 
             @Override
