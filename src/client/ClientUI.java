@@ -35,7 +35,6 @@ public class ClientUI {
             @Override
             public void privateMessage(User sender, User receiver, String message) {
                 window.log.addPrivateMessage(sender, receiver, message);
-
             }
 
             @Override
@@ -109,6 +108,7 @@ public class ClientUI {
         ));
 
         window.btnSend.addActionListener(e -> {
+            if (window.tfMessage.getText().isEmpty()) return;;
             if (window.listUsers.isSelectionEmpty()) {
                 app.sendPublicMessage(window.tfMessage.getText());
             } else {

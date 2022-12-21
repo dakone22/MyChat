@@ -101,7 +101,9 @@ public class ChatLog {
     public void addPrivateMessage(User fromUser, User toUser, String message) {
         addStyledText("[", privateMessageStyle);
         addUsername(fromUser, privateMessageStyle);
-        addStyledText(" -> %s]> %s\n".formatted(toUser.username(), message), privateMessageStyle);
+        addStyledText(" -> ", privateMessageStyle);
+        addUsername(toUser, privateMessageStyle);
+        addStyledText("]> %s\n".formatted(message), privateMessageStyle);
     }
 
     public void addSystemMessage(String message) {

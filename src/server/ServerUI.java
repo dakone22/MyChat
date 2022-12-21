@@ -66,6 +66,11 @@ public class ServerUI {
             }
 
             @Override
+            public void onCustomMessage(String msg) {
+                window.log.addSystemMessage(msg);
+            }
+
+            @Override
             public void onClientExceptionDisconnected(User user, Throwable exception) {
                 window.log.addSystemMessage("Client \"%s\" forceDisconnected: %s".formatted(user.username(), exception.getMessage()));
             }

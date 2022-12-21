@@ -23,4 +23,6 @@ public interface ServerUIUpdater extends ExceptionOccurredListener {
     void onAuthorizationTimeout(ClientConnectionHandler client);
 
     void onAuthorizationFailed(ClientConnectionHandler client);
+
+    void onCustomMessage(String msg);
 }

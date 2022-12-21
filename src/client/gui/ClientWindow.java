@@ -55,8 +55,6 @@ public class ClientWindow extends JFrame {
         setState(State.Disconnected);
 
         log = new ChatLog(jTextPane, user -> listUsers.setSelectedValue(user, true));
-
-
     }
 
     public enum State {

@@ -75,6 +75,7 @@ public class ServerController {
                 }
 
                 serverNetwork.send(receiverClient, new PrivateChatMessageS2CPacket(senderUser, receiverUser, message));
+                serverNetwork.send(senderClient, new PrivateChatMessageS2CPacket(senderUser, receiverUser, message));
                 output.onPrivateMessage(senderUser, receiverUser, message);
             }
 
@@ -261,10 +262,13 @@ public class ServerController {
         ClientConnectionHandler client;
         synchronized (users) {
             client = getClient(user);
-            if (client == null)
+            if (client == null) {
                 (new RuntimeException("Sending pm to unknown user %s: %s.".formatted(user.toString(), msg))).printStackTrace();
+                return;
+            }
             removeUser(user);
         }
         serverNetwork.send(client, new CustomSystemMessageS2CPacket(msg));
+        output.onCustomMessage(msg);
     }
 }
